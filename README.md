@@ -5,30 +5,19 @@
 yarn install
 ```
 
-### Compiles and hot-reloads for development
-```
-yarn run serve
+### Start & Develop
+- [ ] 需要执行两个命令，等待该静
+
+```bash
+yarn run serve # start vue dev server
+yarn run electron # start electron
 ```
 
-### Compiles and minifies for production
-```
-yarn run build
-```
+### Compile
+- [ ] 等待补充
 
-### Run your tests
-```
-yarn run test
-```
-
-### Lints and fixes files
-```
-yarn run lint
-```
-
-### start with electron
-```
-yarn run electron
-```
-
-### Customize configuration
+### Vue Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+### Electron API
+See [Election API](https://electronjs.org/docs/api)
