@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow,ipcMain } = require('electron')
 
 let win
 
@@ -11,6 +11,7 @@ function createWindow () {
   win.on('closed', function () {
     win = null
   })
+  win.webContents.openDevTools();
 }
 
 app.on('ready', createWindow)
@@ -21,3 +22,14 @@ app.on('window-all-closed', function () {
   }
 })
 
+ipcMain.on('reqaction', (event, arg) => {
+  switch(arg){
+    case 'exit':
+      safeExit=true;
+      app.quit();//退出程序
+      break;
+    case 'addDb':
+      console.log(arg)
+      break;
+  }
+});

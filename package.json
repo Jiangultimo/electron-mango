@@ -9,6 +9,8 @@
     "electron": "nodemon --watch * --exec 'electron .'"
   },
   "dependencies": {
+    "electron-json-storage": "^4.1.5",
+    "mongodb": "^3.1.10",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"

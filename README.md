@@ -25,5 +25,10 @@ yarn run test
 yarn run lint
 ```
 
+### start with electron
+```
+yarn run electron
+```
+
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
