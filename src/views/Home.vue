@@ -1,14 +1,25 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
+    <my-nav></my-nav>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
+import MyNav from '@/components/Nav/'
 export default {
   name: 'home',
   components: {
+    MyNav
   }
 }
 </script>
+
+<style lang="less" scoped>
+.home{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+}
+</style>
