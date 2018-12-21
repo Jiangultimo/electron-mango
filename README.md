@@ -1,4 +1,4 @@
-# demo
+# electron-mango
 
 ## Project setup
 ```
