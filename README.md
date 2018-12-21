@@ -6,7 +6,7 @@ yarn install
 ```
 
 ### Start & Develop
-- [ ] 需要执行两个命令，等待该静
+- [ ] 需要执行两个命令, 等待改进
 
 ```bash
 yarn run serve # start vue dev server
