@@ -1,15 +1,29 @@
 <template>
   <div class="home">
-    <my-nav></my-nav>
+    <div id="connected">我会显示已经连接的数据库</div>
+    <div id="connectiong">
+      <ul>
+        <li v-for="(uri,name) in dbList" :key="name">{{name}}</li>
+      </ul>
+    </div>
+    <router-view/>
   </div>
 </template>
 
 <script>
-import MyNav from '@/components/Nav/'
+const { remote, ipcRenderer } = window.require('electron')
 export default {
   name: 'home',
-  components: {
-    MyNav
+  data () {
+    return {
+      dbList: {}
+    }
+  },
+  created () {
+    this.dbList = remote.getGlobal('shared').dbList
+    ipcRenderer.on('reloadDb', (event, arg) => {
+      this.dbList = arg
+    })
   }
 }
 </script>

@@ -1,18 +1,17 @@
 <template>
   <div class="about">
-    <h1>This is an intro page</h1>
-    <el-button @click="close">好的</el-button>
+    <prev-route :prev="'/'" />
+    <p>I'll show dabtabase info</p>
   </div>
 </template>
 
 <script>
+import PrevRoute from '@/components/PrevRoute/'
 export default {
   components: {
+    PrevRoute
   },
   methods: {
-    close () {
-      window.close()
-    }
   }
 }
 </script>

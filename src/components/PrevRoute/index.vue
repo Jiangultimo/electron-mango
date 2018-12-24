@@ -1,13 +1,16 @@
 <template>
 <div class="prev">
-  <router-link :to="prev">返回上一页</router-link>
+  <el-button @click="back">返回上一页</el-button>
 </div>
 </template>
 
 <script>
 export default {
-  name: 'prevRoute',
-  props: ['prev']
+  methods: {
+    back () {
+      this.$router.back()
+    }
+  }
 }
 </script>
 

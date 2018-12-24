@@ -29,11 +29,6 @@ export default {
   },
   data () {
     return {
-      d: {
-        action: 'addDb',
-        name: '',
-        uri: 'mongodb://[2400:a480:1:2::48]:27017/'
-      },
       form: {
         action: 'addDb',
         name: 'localhost',
@@ -43,7 +38,16 @@ export default {
   },
   mounted () {
     ipcRenderer.on('resaction', (event, arg) => {
-      console.log(arg)
+      if (arg.action === 'addDb') {
+        if (arg.status) {
+          window.close()
+        } else {
+          this.$notify.error({
+            title: '添加失败',
+            message: arg.info
+          })
+        }
+      }
     })
   }
 }
