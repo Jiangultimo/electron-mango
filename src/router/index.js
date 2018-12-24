@@ -21,6 +21,11 @@ export default new Router({
       ]
     },
     {
+      path: '/database/edit/:key',
+      name: 'editDb',
+      component: () => import('@/views/AddDb.vue')
+    },
+    {
       path: '/database/add',
       name: 'addDb',
       component: () => import('@/views/AddDb.vue')
@@ -29,6 +34,10 @@ export default new Router({
       path: '/about',
       name: 'about',
       component: () => import('@/views/About.vue')
+    },
+    {
+      path: '*',
+      redirect: '/'
     }
   ]
 })

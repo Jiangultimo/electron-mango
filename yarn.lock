@@ -5374,6 +5374,11 @@ mongodb-core@3.1.9:
   optionalDependencies:
     saslprep "^1.0.0"
 
+mongodb-uri@^0.9.7:
+  version "0.9.7"
+  resolved "https://registry.yarnpkg.com/mongodb-uri/-/mongodb-uri-0.9.7.tgz#0f771ad16f483ae65f4287969428e9fbc4aa6181"
+  integrity sha1-D3ca0W9IOuZfQoeWlCjp+8SqYYE=
+
 mongodb@^3.1.10:
   version "3.1.10"
   resolved "https://registry.yarnpkg.com/mongodb/-/mongodb-3.1.10.tgz#45ad9b74ea376f4122d0881b75e5489b9e504ed7"
