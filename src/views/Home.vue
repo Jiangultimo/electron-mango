@@ -23,10 +23,10 @@ export default {
   },
   methods: {
     connect (name) {
-      if (name in this.connected) return //已经连接了
-      var client = new MongoClient( this.dbList[name], { useNewUrlParser: true })
-      client.connect(function(err) {
-        if (err!=null) {
+      if (name in this.connected) return // 已经连接了
+      var client = new MongoClient(this.dbList[name], { useNewUrlParser: true })
+      client.connect(function (err) {
+        if (err != null) {
           console.log(err)
           return false
         } else {
@@ -35,7 +35,7 @@ export default {
             dbs: []
           }
         }
-      });
+      })
     }
   },
   created () {
