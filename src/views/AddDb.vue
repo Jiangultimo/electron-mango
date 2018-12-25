@@ -5,10 +5,10 @@
         <el-input v-model="form.name" minlength="1"></el-input>
       </el-form-item>
       <el-form-item label="服务器地址">
-        <el-input v-model="params.hosts[0].host"></el-input>
+        <el-input v-model="params.hosts.host"></el-input>
       </el-form-item>
       <el-form-item label="数据库端口">
-        <el-input v-model="params.hosts[0].port"></el-input>
+        <el-input v-model="params.hosts.port"></el-input>
       </el-form-item>
       <el-form-item label="用户名">
         <el-input v-model="params.username"></el-input>
@@ -31,26 +31,27 @@
 </template>
 
 <script>
-import qs from 'qs'
-import mongoUri from 'mongodb-uri'
+import mongoUri from '@/utils/MongoUri'
+const { MongoClient } = window.require('mongodb')
 const { ipcRenderer, remote } = window.require('electron')
 export default {
   methods: {
     test () {
-      this.genUri()
-      ipcRenderer.send('reqaction', { action: 'testConnect', uri: this.form.uri })
-    },
-    genUri () {
-      var host = this.params.hosts[0].host
-      if (host.indexOf(':') >= 0 && host[0] !== '[') {
-        this.params.hosts[0].host = `[${host}]`
-      }
-      let t = Object.assign({}, this.params)
-      t.options = qs.parse(t.options)
-      this.form.uri = mongoUri.format(t)
+      this.form.uri = mongoUri.format(this.params)
+      console.log(this.form.uri)
+      var client = new MongoClient(this.form.uri, { useNewUrlParser: true })
+      client.connect((err) => {
+        if (err != null) {
+          this.$message.error(err.message)
+          return false
+        } else {
+          client.close()
+          this.$message.success('连接成功！')
+        }
+      })
     },
     save () {
-      this.genUri()
+      this.form.uri = mongoUri.format(this.params)
       ipcRenderer.send('reqaction', this.form)
     }
   },
@@ -60,7 +61,6 @@ export default {
       let data = remote.getGlobal('shared').dbList
       if (key in data) {
         let params = mongoUri.parse(data[key].uri)
-        params.options = qs.stringify(params.options)
         this.form = {
           action: 'editDb',
           key,
@@ -76,12 +76,10 @@ export default {
       params: {
         username: '',
         password: '',
-        hosts: [
-          {
-            host: 'localhost',
-            port: 27017
-          }
-        ],
+        hosts: {
+          host: 'localhost',
+          port: 27017
+        },
         database: '',
         options: ''
       },

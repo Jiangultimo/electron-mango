@@ -106,8 +106,5 @@ ipcMain.on('reqaction', (event, arg) => {
         jsonStorage.set(storeKey,global.shared.dbList,relaodDb)
       }
       break
-    case 'testConnect':
-      
-      break
   }
 })
