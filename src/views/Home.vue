@@ -12,7 +12,7 @@
 
 <script>
 const { remote, ipcRenderer } = window.require('electron')
-const MongoClient = window.require('mongodb')
+const { MongoClient } = window.require('mongodb')
 export default {
   name: 'home',
   data () {
@@ -25,13 +25,13 @@ export default {
     connect (name) {
       if (name in this.connected) return // 已经连接了
       var client = new MongoClient(this.dbList[name], { useNewUrlParser: true })
-      client.connect(function (err) {
+      client.connect((err) => {
         if (err != null) {
           console.log(err)
           return false
         } else {
+          this.$mongo[name]=client
           this.connected[name] = {
-            obj: client,
             dbs: []
           }
         }
