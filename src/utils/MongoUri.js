@@ -41,6 +41,8 @@ export default {
       var options = rest.substring(i + 1)
       rest = rest.substring(0, i)
       uriObject.options = options
+    } else {
+      uriObject.options = ''
     }
 
     i = rest.indexOf('/')

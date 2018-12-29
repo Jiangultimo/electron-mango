@@ -4,13 +4,29 @@
       <div v-for="(obj,name) in connected" :key="name">
         <p>{{name}}</p>
         <ul>
-          <li v-for="db in obj.dbs" :key="db.name">{{db.name}} {{db.sizeOnDisk}}Byte</li>
+          <li v-for="db in obj.dbs" :key="db.name">
+            <span @dblclick="getCollect(name,db.name)">{{db.name}}</span> {{db.sizeOnDisk}}Byte
+            <div>
+              <ul>
+                <li v-for="collect in db.collects" :key="collect.name">
+                  {{name}}
+                  <el-button type="primary" @click="editConnect(name)">编辑</el-button>
+                  <el-button type="danger" @click="delConnect(name)">删除</el-button>
+                </li>
+              </ul>
+            </div>
+          </li>
         </ul>
       </div>
     </div>
     <div id="connectiong">
+      <el-button type="primary" @click="newConnect">新建连接</el-button>
       <ul>
-        <li v-for="(uri,name) in dbList" :key="name" @dblclick="connect(name)">{{name}}</li>
+        <li v-for="(uri,name) in dbList" :key="name" @dblclick="connect(name)">
+          {{name}}
+          <el-button type="primary" @click="editConnect(name)">编辑</el-button>
+          <el-button type="danger" @click="delConnect(name)">删除</el-button>
+        </li>
       </ul>
     </div>
     <router-view/>
@@ -22,6 +38,14 @@ import mongoUri from '@/utils/MongoUri'
 const { remote, ipcRenderer } = window.require('electron')
 const { MongoClient } = window.require('mongodb')
 
+class DbInfo {
+  constructor (obj) {
+    this.name = obj.name
+    this.sizeOnDisk = obj.sizeOnDisk
+    this.collects = []
+  }
+}
+
 export default {
   name: 'home',
   data () {
@@ -31,6 +55,15 @@ export default {
     }
   },
   methods: {
+    newConnect () {
+      ipcRenderer.send('reqaction', { action: 'showAddDb' })
+    },
+    delConnect (name) {
+      ipcRenderer.send('reqaction', { action: 'delDb', name })
+    },
+    editConnect (name) {
+      ipcRenderer.send('reqaction', { action: 'showAddDb', name })
+    },
     connect (name) {
       if (name in this.connected) return // 已经连接了
       var client = new MongoClient(this.dbList[name], { useNewUrlParser: true })
@@ -47,7 +80,8 @@ export default {
           })
           this.connected[name].admin.listDatabases()
             .then((dbs) => {
-              this.connected[name].dbs = dbs.databases
+              this.connected[name].dbs = dbs.databases.map(i => new DbInfo(i))
+              console.log(this.connected[name].dbs)
             })
         }
       })
@@ -62,6 +96,12 @@ export default {
           delete this.connected[x]
         }
       }
+    })
+    ipcRenderer.on('notify', (event, arg) => {
+      this.$message({
+        type: arg.type || 'error',
+        message: arg.message
+      })
     })
   }
 }

@@ -9,6 +9,9 @@
 export default {
   components: {
   },
+  created () {
+    document.title = '关于'
+  },
   methods: {
     close () {
       window.close()

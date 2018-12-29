@@ -19,7 +19,7 @@ const menuTemplate=[
       {
         label:'新建连接',
         click () {
-          openWin('http://localhost:3000/#/database/add','添加服务器')
+          openWin('http://localhost:3000/#/database/add')
         }
       },
       { type: 'separator' },
@@ -29,13 +29,13 @@ const menuTemplate=[
   {
     label:'关于',
     click () {
-      openWin('http://localhost:3000/#/about','关于')
+      openWin('http://localhost:3000/#/about')
     }
   }
 ]
 
-function openWin(url,title) {
-  let newWin=new BrowserWindow({ show: false,parent: win, autoHideMenuBar: true, title })
+function openWin(url) {
+  let newWin=new BrowserWindow({ show: false,parent: win, autoHideMenuBar: true })
   newWin.once('ready-to-show', () => {
     newWin.show()
   })
@@ -45,7 +45,6 @@ function openWin(url,title) {
 
 function createWindow() {
   win = new BrowserWindow({
-    title: 'electron-mango',
     width: 1200,
     height: 720
   })
@@ -70,7 +69,7 @@ ipcMain.on('reqaction', (event, arg) => {
   const { action } = arg
   const relaodDb=function(err) {
     if (err){
-      console.log(err)
+      win.webContents.send('notify', { message:err.message})
     }else{
       event.sender.send('resaction', {action,status:true})
       win.webContents.send('reloadDb',global.shared.dbList)
@@ -86,7 +85,7 @@ ipcMain.on('reqaction', (event, arg) => {
         delete global.shared.dbList[arg.name]
         jsonStorage.set(storeKey,global.shared.dbList,relaodDb)
       }else{
-        event.sender.send('resaction', {action,status:false,info:'此连接已删除！'})
+        event.sender.send('notify', { message:'此连接已删除！'})
       }
       break
     case 'editDb':
@@ -95,16 +94,21 @@ ipcMain.on('reqaction', (event, arg) => {
         global.shared.dbList[arg.name]=arg.uri
         jsonStorage.set(storeKey,global.shared.dbList,relaodDb)
       }else{
-        event.sender.send('resaction', {action,status:false,info:'此连接已被修改！'})
+        event.sender.send('notify', { message:'此连接已被修改！'})
       }
       break
     case 'addDb':
       if (arg.name in global.shared.dbList){
-        event.sender.send('resaction', {action,status:false,info:'此连接已存在！'})
+        event.sender.send('notify', { message:'此连接已存在！'})
       }else{
         global.shared.dbList[arg.name]=arg.uri
         jsonStorage.set(storeKey,global.shared.dbList,relaodDb)
       }
+      break
+    case 'showAddDb':
+      if ('name' in arg){
+        openWin('http://localhost:3000/#/database/edit/'+arg['name'])
+      }else openWin('http://localhost:3000/#/database/add')
       break
   }
 })

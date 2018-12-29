@@ -56,16 +56,19 @@ export default {
     }
   },
   created () {
+    document.title = '添加连接'
     if ('key' in this.$route.params) {
       const key = this.$route.params.key
       let data = remote.getGlobal('shared').dbList
       if (key in data) {
-        let params = mongoUri.parse(data[key].uri)
+        document.title = '修改连接'
+        let params = mongoUri.parser(data[key])
+        console.log(data[key])
         this.form = {
           action: 'editDb',
           key,
-          name: data[key].name,
-          uri: data[key].uri
+          name: key,
+          uri: data[key]
         }
         this.params = params
       }
@@ -93,16 +96,15 @@ export default {
   },
   mounted () {
     ipcRenderer.on('resaction', (event, arg) => {
-      if (arg.action === 'addDb') {
-        if (arg.status) {
-          window.close()
-        } else {
-          this.$notify.error({
-            title: '添加失败',
-            message: arg.info
-          })
-        }
+      if (arg.action === 'addDb' || arg.action === 'editDb') {
+        window.close()
       }
+    })
+    ipcRenderer.on('notify', (event, arg) => {
+      this.$message({
+        type: arg.type || 'error',
+        message: arg.message
+      })
     })
   }
 }
