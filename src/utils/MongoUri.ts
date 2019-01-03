@@ -1,5 +1,15 @@
+interface mongoUri{
+  username:string,
+  password:string,
+  hosts: {
+    host:string,
+    port: number
+  },
+  database: string,
+  options: string
+}
 export default {
-  format (params) {
+  format (params:mongoUri):string {
     var res = 'mongodb://'
     if (params.username !== '') {
       res += encodeURIComponent(params.username) + ':' + encodeURIComponent(params.password) + '@'
@@ -19,8 +29,17 @@ export default {
     }
     return res
   },
-  parser (uri = '') {
-    var uriObject = {}
+  parser (uri:string):mongoUri {
+    var uriObject:mongoUri = {
+      username: '',
+      password: '',
+      hosts: {
+        host: 'localhost',
+        port: 27017
+      },
+      database: '',
+      options: ''
+    }
     var rest = uri.substring(11)
 
     var i = rest.indexOf('@')
@@ -41,8 +60,6 @@ export default {
       var options = rest.substring(i + 1)
       rest = rest.substring(0, i)
       uriObject.options = options
-    } else {
-      uriObject.options = ''
     }
 
     i = rest.indexOf('/')

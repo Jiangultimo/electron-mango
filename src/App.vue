@@ -4,13 +4,6 @@
   </div>
 </template>
 
-<script>
-export default {
-  components: {
-  }
-}
-</script>
-
 <style lang="less">
 html, body {
   padding: 0;
