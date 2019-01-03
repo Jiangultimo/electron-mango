@@ -30,31 +30,47 @@
   </div>
 </template>
 
-<script>
-import mongoUri from '@/utils/MongoUri'
+<script lang="ts">
+import mongoUtil,{mongoUri} from '@/utils/MongoUri'
 const { MongoClient } = window.require('mongodb')
 const { ipcRenderer, remote } = window.require('electron')
-export default {
-  methods: {
-    test () {
-      this.form.uri = mongoUri.format(this.params)
-      console.log(this.form.uri)
-      var client = new MongoClient(this.form.uri, { useNewUrlParser: true })
-      client.connect((err) => {
-        if (err != null) {
-          this.$message.error(err.message)
-          return false
-        } else {
-          client.close()
-          this.$message.success('连接成功！')
-        }
-      })
+import { Component, Vue } from 'vue-property-decorator'
+import {notify} from '@/type/ipc'
+@Component
+export default class addDb extends Vue {
+  params:mongoUri= {
+    username: '',
+    password: '',
+    hosts: {
+      host: 'localhost',
+      port: 27017
     },
-    save () {
-      this.form.uri = mongoUri.format(this.params)
-      ipcRenderer.send('reqaction', this.form)
-    }
-  },
+    database: '',
+    options: ''
+  }
+  form = {
+    action: 'addDb',
+    key: '',
+    name: '',
+    uri: ''
+  }
+  test () {
+    this.form.uri = mongoUtil.format(this.params)
+    var client = new MongoClient(this.form.uri, { useNewUrlParser: true })
+    client.connect((err:Error) => {
+      if (err != null) {
+        this.$message.error(err.message)
+        return false
+      } else {
+        client.close()
+        this.$message.success('连接成功！')
+      }
+    })
+  }
+  save () {
+    this.form.uri = mongoUtil.format(this.params)
+    ipcRenderer.send('reqaction', this.form)
+  }
   created () {
     document.title = '添加连接'
     if ('key' in this.$route.params) {
@@ -62,8 +78,7 @@ export default {
       let data = remote.getGlobal('shared').dbList
       if (key in data) {
         document.title = '修改连接'
-        let params = mongoUri.parser(data[key])
-        console.log(data[key])
+        let params = mongoUtil.parser(data[key])
         this.form = {
           action: 'editDb',
           key,
@@ -73,34 +88,14 @@ export default {
         this.params = params
       }
     }
-  },
-  data () {
-    return {
-      params: {
-        username: '',
-        password: '',
-        hosts: {
-          host: 'localhost',
-          port: 27017
-        },
-        database: '',
-        options: ''
-      },
-      form: {
-        action: 'addDb',
-        key: '',
-        name: '',
-        uri: ''
-      }
-    }
-  },
+  }
   mounted () {
-    ipcRenderer.on('resaction', (event, arg) => {
+    ipcRenderer.on('resaction', (event:Error, arg:any) => {
       if (arg.action === 'addDb' || arg.action === 'editDb') {
         window.close()
       }
     })
-    ipcRenderer.on('notify', (event, arg) => {
+    ipcRenderer.on('notify', (event:Error, arg:notify) => {
       this.$message({
         type: arg.type || 'error',
         message: arg.message

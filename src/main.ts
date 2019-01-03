@@ -5,6 +5,10 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import store from './store'
 
+declare global {
+  interface Window { require: any; }
+}
+
 Vue.use(ElementUI)
 
 Vue.config.productionTip = false

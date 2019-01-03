@@ -1,4 +1,4 @@
-interface mongoUri{
+export interface mongoUri{
   username:string,
   password:string,
   hosts: {
