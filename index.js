@@ -1,24 +1,25 @@
-const { app, BrowserWindow, ipcMain,Menu } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu } = require('electron')
 const jsonStorage = require('electron-json-storage')
-const storeKey='dbList'
+const storeKey = 'dbList'
+const handleAction = require('./main/action')
 global.shared = {
-  dbList:{}
+  dbList: {}
 }
-let win=null
-jsonStorage.get(storeKey,(err, data)=>{
+let win = null
+jsonStorage.get(storeKey, (err, data) => {
   global.shared.dbList = data
-  if (win){
-    win.webContents.send('reloadDb',data)
+  if (win) {
+    win.webContents.send('reloadDb', data)
   }
 })
 
-const menuTemplate=[
+const menuTemplate = [
   {
-    label:'文件',
-    submenu:[
+    label: '文件',
+    submenu: [
       {
-        label:'新建连接',
-        click () {
+        label: '新建连接',
+        click() {
           openWin('http://localhost:3000/#/database/add')
         }
       },
@@ -27,15 +28,15 @@ const menuTemplate=[
     ]
   },
   {
-    label:'关于',
-    click () {
+    label: '关于',
+    click() {
       openWin('http://localhost:3000/#/about')
     }
   }
 ]
 
 function openWin(url) {
-  let newWin=new BrowserWindow({ show: false,parent: win, autoHideMenuBar: true })
+  let newWin = new BrowserWindow({ show: false, parent: win, autoHideMenuBar: true })
   newWin.once('ready-to-show', () => {
     newWin.show()
   })
@@ -67,48 +68,13 @@ app.on('window-all-closed', function () {
 
 ipcMain.on('reqaction', (event, arg) => {
   const { action } = arg
-  const relaodDb=function(err) {
-    if (err){
-      win.webContents.send('notify', { message:err.message})
-    }else{
-      event.sender.send('resaction', {action,status:true})
-      win.webContents.send('reloadDb',global.shared.dbList)
+  const relaodDb = function (err) {
+    if (err) {
+      win.webContents.send('notify', { message: err.message })
+    } else {
+      event.sender.send('resaction', { action, status: true })
+      win.webContents.send('reloadDb', global.shared.dbList)
     }
   }
-  switch (action) {
-    case 'exit':
-      safeExit = true
-      app.quit() //退出程序
-      break
-    case 'delDb':
-      if (arg.name in global.shared.dbList){
-        delete global.shared.dbList[arg.name]
-        jsonStorage.set(storeKey,global.shared.dbList,relaodDb)
-      }else{
-        event.sender.send('notify', { message:'此连接已删除！'})
-      }
-      break
-    case 'editDb':
-      if (arg.key in global.shared.dbList){
-        delete global.shared.dbList[arg.key]
-        global.shared.dbList[arg.name]=arg.uri
-        jsonStorage.set(storeKey,global.shared.dbList,relaodDb)
-      }else{
-        event.sender.send('notify', { message:'此连接已被修改！'})
-      }
-      break
-    case 'addDb':
-      if (arg.name in global.shared.dbList){
-        event.sender.send('notify', { message:'此连接已存在！'})
-      }else{
-        global.shared.dbList[arg.name]=arg.uri
-        jsonStorage.set(storeKey,global.shared.dbList,relaodDb)
-      }
-      break
-    case 'showAddDb':
-      if ('name' in arg){
-        openWin('http://localhost:3000/#/database/edit/'+arg['name'])
-      }else openWin('http://localhost:3000/#/database/add')
-      break
-  }
+  handleAction({ event, arg, openWin, relaodDb, jsonStorage, storeKey })[action]()
 })
