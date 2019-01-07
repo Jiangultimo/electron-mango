@@ -1,24 +1,5 @@
 <template>
   <div class="home">
-    <div id="connected">
-      <div v-for="(obj,name) in connected" :key="name">
-        <p>{{name}}</p>
-        <ul>
-          <li v-for="db in obj.dbs" :key="db.name">
-            <span @dblclick="getCollect(name,db.name)">{{db.name}}</span> {{db.sizeOnDisk}}KB
-            <div>
-              <ul>
-                <li v-for="collect in db.collects" :key="collect.name">
-                  {{name}}
-                  <el-button type="primary" @click="editConnect(name)">编辑</el-button>
-                  <el-button type="danger" @click="delConnect(name)">删除</el-button>
-                </li>
-              </ul>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
     <div id="connectiong">
       <el-button type="primary" @click="newConnect">新建连接</el-button>
       <ul>
@@ -35,7 +16,6 @@
 
 <script lang="ts">
 import { Vue, Component, Provide } from 'vue-property-decorator'
-import mongoUri from '@/utils/MongoUri'
 const { remote, ipcRenderer } = window.require('electron')
 const { MongoClient } = window.require('mongodb')
 
@@ -48,6 +28,12 @@ class DbInfo {
     this.sizeOnDisk = Number(obj.sizeOnDisk) / 1024
     this.collects = []
   }
+}
+
+interface Payload {
+  linkName: string,
+  linkAddr: string,
+  dbs: any[]
 }
 
 @Component
@@ -83,12 +69,22 @@ export default class Home extends Vue {
         this.connected[name].dbs = databases.map(function(db: Object): Object {
           return new DbInfo(db)
         })
+        const payload: Payload = {
+          linkName: name,
+          linkAddr: remote.getGlobal('shared').dbList[name],
+          dbs:  this.connected[name].dbs
+        }
+        this.$store.dispatch({
+          type: 'setDBs',
+          payload: payload
+        })
       }
     })
   }
 
   created () {
     this.dbList = remote.getGlobal('shared').dbList
+    console.log(this.dbList)
     ipcRenderer.on('reloadDb', (event: any, arg: IArguments) => {
       this.dbList = arg
       for (const key in this.connected) {
@@ -109,10 +105,10 @@ export default class Home extends Vue {
 
 <style lang="less" scoped>
 .home{
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 48px;
+  // position: absolute;
+  // top: 50%;
+  // left: 50%;
+  // transform: translate(-50%, -50%);
+  // font-size: 48px;
 }
 </style>

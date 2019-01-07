@@ -52,7 +52,7 @@ export default class addDb extends Vue {
   form = {
     action: 'addDb',
     key: '',
-    name: '',
+    name: 'localhost',
     uri: ''
   }
   test () {
@@ -109,11 +109,13 @@ export default class addDb extends Vue {
 <style lang="less" scoped>
 .connect{
   width: 600px;
-  text-align: center;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin-left: -300px;
+  display: block;
+  margin: 0 auto;
+  // text-align: center;
+  // position: absolute;
+  // top: 50%;
+  // left: 50%;
+  // margin-left: -300px;
   // transform: translate(-50%, -50%);
 }
 </style>
