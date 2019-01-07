@@ -5,7 +5,7 @@
         <p>{{name}}</p>
         <ul>
           <li v-for="db in obj.dbs" :key="db.name">
-            <span @dblclick="getCollect(name,db.name)">{{db.name}}</span> {{db.sizeOnDisk}}Byte
+            <span @dblclick="getCollect(name,db.name)">{{db.name}}</span> {{db.sizeOnDisk}}KB
             <div>
               <ul>
                 <li v-for="collect in db.collects" :key="collect.name">
@@ -33,71 +33,71 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Vue, Component, Provide } from 'vue-property-decorator'
 import mongoUri from '@/utils/MongoUri'
 const { remote, ipcRenderer } = window.require('electron')
 const { MongoClient } = window.require('mongodb')
 
 class DbInfo {
-  constructor (obj) {
+  public name: string
+  public sizeOnDisk: any
+  public collects: any[]
+  constructor (obj: any) {
     this.name = obj.name
-    this.sizeOnDisk = obj.sizeOnDisk
+    this.sizeOnDisk = Number(obj.sizeOnDisk) / 1024
     this.collects = []
   }
 }
 
-export default {
-  name: 'home',
-  data () {
-    return {
-      connected: {},
-      dbList: {}
+@Component
+export default class Home extends Vue {
+  // data
+  connected: any = {}
+  dbList: any = {}
+
+  // methods
+  newConnect () {
+    ipcRenderer.send('reqaction', { action: 'showAddDb' })
+  }
+  delConnect (name: string): void {
+    ipcRenderer.send('reqaction', { action: 'delDb', name })
+  }
+  editConnect (name: string): void {
+    ipcRenderer.send('reqaction', { action: 'showAddDb', name })
+  }
+  connect (name: string): void {
+    if (name in this.connected) {
+      return // 已经连接了
     }
-  },
-  methods: {
-    newConnect () {
-      ipcRenderer.send('reqaction', { action: 'showAddDb' })
-    },
-    delConnect (name) {
-      ipcRenderer.send('reqaction', { action: 'delDb', name })
-    },
-    editConnect (name) {
-      ipcRenderer.send('reqaction', { action: 'showAddDb', name })
-    },
-    connect (name) {
-      if (name in this.connected) return // 已经连接了
-      var client = new MongoClient(this.dbList[name], { useNewUrlParser: true })
-      client.connect((err) => {
-        if (err != null) {
-          this.$message.error(err.message)
-          return false
-        } else {
-          this.$mongo[name] = client
-          var dbName = mongoUri.parser(this.dbList[name]).database
-          this.$set(this.connected, name, {
-            admin: client.db(dbName).admin(),
-            dbs: []
-          })
-          this.connected[name].admin.listDatabases()
-            .then((dbs) => {
-              this.connected[name].dbs = dbs.databases.map(i => new DbInfo(i))
-              console.log(this.connected[name].dbs)
-            })
-        }
-      })
-    }
-  },
+    ipcRenderer.send('reqaction', {
+      action: 'connect',
+      name
+    })
+    ipcRenderer.on('connected', (event: any, arg: any) => {
+      const { ok, totalSize, databases } = arg.dbs
+      if( ok == 1) {
+        this.$set(this.connected, name, {
+          dbs: []
+        })
+        this.connected[name].dbs = databases.map(function(db: Object): Object {
+          return new DbInfo(db)
+        })
+      }
+    })
+  }
+
   created () {
     this.dbList = remote.getGlobal('shared').dbList
-    ipcRenderer.on('reloadDb', (event, arg) => {
+    ipcRenderer.on('reloadDb', (event: any, arg: IArguments) => {
       this.dbList = arg
-      for (const x in this.connected) {
-        if (!this.dbList.hasOwnProperty(x)) {
-          delete this.connected[x]
+      for (const key in this.connected) {
+        if (!this.dbList.hasOwnProperty(key)) {
+          delete this.connected[key]
         }
       }
     })
-    ipcRenderer.on('notify', (event, arg) => {
+    ipcRenderer.on('notify', (event: any, arg: any) => {
       this.$message({
         type: arg.type || 'error',
         message: arg.message

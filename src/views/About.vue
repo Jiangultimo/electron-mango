@@ -5,17 +5,17 @@
   </div>
 </template>
 
-<script>
-export default {
-  components: {
-  },
-  created () {
+<script lang="ts">
+import { Vue, Component } from 'vue-property-decorator'
+
+@Component
+export default class About extends Vue {
+  created() {
     document.title = '关于'
-  },
-  methods: {
-    close () {
-      window.close()
-    }
+  }
+
+  close() {
+    window.close()
   }
 }
 </script>

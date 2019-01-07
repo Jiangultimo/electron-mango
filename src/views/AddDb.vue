@@ -35,7 +35,8 @@ import mongoUtil,{mongoUri} from '@/utils/MongoUri'
 const { MongoClient } = window.require('mongodb')
 const { ipcRenderer, remote } = window.require('electron')
 import { Component, Vue } from 'vue-property-decorator'
-import {notify} from '@/type/ipc'
+import { notify } from '@/type/ipc'
+
 @Component
 export default class addDb extends Vue {
   params:mongoUri= {
