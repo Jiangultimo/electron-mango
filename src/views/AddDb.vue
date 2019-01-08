@@ -46,7 +46,7 @@ export default class addDb extends Vue {
       host: 'localhost',
       port: 27017
     },
-    database: '',
+    database: 'admin',
     options: ''
   }
   form = {

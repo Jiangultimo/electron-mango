@@ -50,7 +50,7 @@ module.exports = ({
     }
   },
   'connect'() {
-    const { name = 'admin' } = arg
+    const { name } = arg
     const { dbList } = global.shared
     const client = new MongoClient(dbList[name], { useNewUrlParser: true })
     client.connect(async (err) => {
@@ -59,11 +59,11 @@ module.exports = ({
         return false
       }
       // Use the admin database for the operation
-      const adminDB = client.db(name).admin()
+      const adminDB = client.db('admin').admin()
       // List all the available databases
       const allDBs = await adminDB.listDatabases()
       event.sender.send('connected', { dbs: allDBs })
-      client.close()
+      global.shared.dbClient[name]=client
     })
   }
 })

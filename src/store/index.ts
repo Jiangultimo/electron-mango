@@ -11,7 +11,7 @@ const state: State = {
 
 Vue.use(Vuex)
 export default new Vuex.Store({
-  state: state,
+  state,
   mutations: {
     SET_DBS(state: State, { dbs, linkName, linkAddr }) {
       dbs = dbs.map((db: any, index: number) => {

@@ -84,7 +84,6 @@ export default class Home extends Vue {
 
   created () {
     this.dbList = remote.getGlobal('shared').dbList
-    console.log(this.dbList)
     ipcRenderer.on('reloadDb', (event: any, arg: IArguments) => {
       this.dbList = arg
       for (const key in this.connected) {

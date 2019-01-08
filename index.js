@@ -3,6 +3,7 @@ const jsonStorage = require('electron-json-storage')
 const storeKey = 'dbList'
 const handleAction = require('./main/action')
 global.shared = {
+  dbClient:{},
   dbList: {}
 }
 let win = null
