@@ -4,8 +4,7 @@
     <el-tree
       :data="dbs"
       node-key="id"
-      :default-expanded-keys="[2, 3]"
-      :default-checked-keys="[5]"
+      @node-click="click"
       :props="defaultProps">
     </el-tree>
   </div>
@@ -13,22 +12,35 @@
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
+import { Link,TreeType } from '@/type/database';
+const { ipcRenderer } = window.require('electron')
 @Component
 export default class ConnectTree extends Vue {
-  dbs: any[] = []
+  dbs: Array<Link> = []
   defaultProps: Object = {
-    children: 'children',
-    label: 'label'
+    children: 'child',
+    label: 'name',
+    isLeaf: (data:any,node:any)=>{
+      return false
+    }
   }
-  @Watch('allDBs',{
+  @Watch('treeTrance',{
     immediate: true,
     deep: true
   })
-  onAllDBsChange(val: any[], oldVal: Object) {
-    this.dbs = val
+  onAllDBsChange() {
+    this.dbs = [...this.$store.state.treeData.values()]
   }
-  get allDBs () {
-    return this.$store.state.treeData
+  get treeTrance () {
+    return this.$store.state.treeTrance
+  }
+  click(data:any,node:any){
+
+  }
+  created(){
+    ipcRenderer.on('connected', (event: any, arg: any) => {
+      this.$store.commit('ADD_DB',arg)
+    })
   }
 }
 </script>

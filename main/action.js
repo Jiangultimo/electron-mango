@@ -53,16 +53,33 @@ module.exports = ({
     const { name } = arg
     const { dbList } = global.shared
     const client = new MongoClient(dbList[name], { useNewUrlParser: true })
-    client.connect(async (err) => {
+    client.connect((err) => {
       if(err) {
         handleError(err, event)
         return false
       }
+      let dbName='admin'
+      let str=dbList[name].substr(11)
+      var i = str.indexOf('/')+1
+      if (i>0){
+        if (str.indexOf('?')>0){
+          dbName=str.substring(i,str.indexOf('?'))
+        }else dbName=str.substring(i)
+      }
       // Use the admin database for the operation
-      const adminDB = client.db('admin').admin()
+      const adminDB = client.db(dbName).admin()
       // List all the available databases
-      const allDBs = await adminDB.listDatabases()
-      event.sender.send('connected', { dbs: allDBs })
+      adminDB.listDatabases()
+      .then((res) => {
+        event.sender.send('connected', { name, dbs: res.databases })
+      })
+      .catch(() => {
+        client.db(dbName).stats()
+        .then((val) => {
+          let allDBs=[{'name':val.db,'sizeOnDisk':val.dataSize}]
+          event.sender.send('connected', { name, dbs: allDBs })
+        })
+      })
       global.shared.dbClient[name]=client
     })
   }

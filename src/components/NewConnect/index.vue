@@ -1,9 +1,19 @@
 <template>
 <div class="new-connected">
-  <router-link to="/database/add">新建链接</router-link>
+  <el-button type="primary" @click="newConnect">新建连接</el-button>
 </div>
 </template>
+<script lang="ts">
+import { Vue, Component, Provide } from 'vue-property-decorator'
+const { remote, ipcRenderer } = window.require('electron')
 
+@Component
+export default class Home extends Vue {
+  newConnect () {
+    ipcRenderer.send('reqaction', { action: 'showAddDb' })
+  }
+}
+</script>
 <style lang="less" scoped>
 .new-connected{
   width: 100%;

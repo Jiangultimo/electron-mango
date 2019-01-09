@@ -6,18 +6,10 @@ yarn install
 ```
 
 ### Start & Develop
-- [ ] 需要执行两个命令, 等待改进
-
 ```bash
 yarn run serve # start vue dev server
 yarn run electron # start electron
 ```
 
-### Compile
-- [ ] 等待补充
-
-### Vue Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
-
-### Electron API
-See [Election API](https://electronjs.org/docs/api)
+## Known Issue
+Under 3.6, Mongodb don't allow to list databases if user don't have privileges to acess admin. I know there is a solution, but I haven't find it yet. So for the mongodb enabled auth which the version is under 3.6, this softward would only show the database with auth.

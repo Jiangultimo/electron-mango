@@ -1,40 +1,41 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import {Link,DbInfo,TreeType} from '../type/database'
 
 interface State {
-  treeData: any[]
+  treeTrance: number,
+  treeData: Map<string,Link>
 }
 
 const state: State = {
-  treeData: []
+  treeTrance:0,
+  treeData:new Map()
 }
 
 Vue.use(Vuex)
 export default new Vuex.Store({
   state,
   mutations: {
-    SET_DBS(state: State, { dbs, linkName, linkAddr }) {
-      dbs = dbs.map((db: any, index: number) => {
+    ADD_DB(state: State, { dbs, name }) {
+      dbs = dbs.map((db: any):DbInfo => {
         return {
-          id: `${state.treeData.length}-${index}`,
-          label: db.name,
-          sizeOnDisck: db.sizeOnDisck
+          id: `${name}-${db.name}`,
+          name: db.name,
+          type: TreeType.Db,
+          sizeOnDisk: parseFloat((db.sizeOnDisk / 1024).toFixed(2)),
+          child:[]
         }
       })
-      const link = {
-        id: linkName,
-        label: linkName,
-        link: linkAddr,
-        children: dbs
+      const link:Link = {
+        id: name,
+        name: name,
+        type: TreeType.Link,
+        child: dbs
       }
-      state.treeData =  state.treeData.concat(link)
-      console.log(state.treeData)
+      state.treeData.set(name,link)
+      state.treeTrance++
     }
   },
   actions: {
-    setDBs({ commit }, { payload }) {
-      const { dbs, linkName, linkAddr } = payload
-      commit('SET_DBS', { dbs, linkName, linkAddr })
-    }
   }
 })

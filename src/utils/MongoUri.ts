@@ -40,7 +40,7 @@ export default {
       database: '',
       options: ''
     }
-    var rest = uri.substring(11)
+    var rest = uri.substring(10)
 
     var i = rest.indexOf('@')
     if (i >= 0) {
