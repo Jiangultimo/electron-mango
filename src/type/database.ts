@@ -1,8 +1,8 @@
 export interface TreeNode{
-  id:string,
+  id:string,//连接名.数据库名.表名
   name:string,
   type: TreeType,
-  child:Array<any>
+  child?:Array<any>
 }
 
 export interface Collect extends TreeNode{
@@ -24,4 +24,5 @@ export enum TreeType{
   Collect
 }
 
-export declare type SavedLink = Map<string,string>;
+export declare type SavedLink = Map<string,string>
+export const delimiter='.'

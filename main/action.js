@@ -1,15 +1,11 @@
 const { MongoClient } = require('mongodb')
 
-const handleError = (err, event) => {
-  event.sender.send('notify', {
-    message: err
-  })
-}
 module.exports = ({
   event,
   arg,
   openWin,
   relaodDb,
+  handleError,
   jsonStorage,
   storeKey
 }) => ({
@@ -48,6 +44,16 @@ module.exports = ({
     } else {
       openWin('http://localhost:3000/#/database/add')
     }
+  },
+  'getCollects'(){
+    console.log('fuck');
+    
+    const client=global.shared.dbClient[arg.link]
+    client.db(arg.db).collections()
+    .then((val)=>{
+      arg.data=val
+      event.sender.send('mongoRes', arg)
+    })
   },
   'connect'() {
     const { name } = arg

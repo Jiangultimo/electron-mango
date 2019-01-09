@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, Menu } = require('electron')
 const jsonStorage = require('electron-json-storage')
 const storeKey = 'dbList'
 const handleAction = require('./main/action')
+const mongoAction = require('./main/mongoAction')
 global.shared = {
   dbClient:{},
   dbList: {}
@@ -67,15 +68,24 @@ app.on('window-all-closed', function () {
   }
 })
 
+const relaodDb = function (err) {
+  if (err) {
+    win.webContents.send('notify', { message: err.message })
+  } else {
+    event.sender.send('resaction', { action, status: true })
+    win.webContents.send('reloadDb', global.shared.dbList)
+  }
+}
+const handleError = (err, event) => {
+  event.sender.send('notify', {
+    message: err
+  })
+}
 ipcMain.on('reqaction', (event, arg) => {
   const { action } = arg
-  const relaodDb = function (err) {
-    if (err) {
-      win.webContents.send('notify', { message: err.message })
-    } else {
-      event.sender.send('resaction', { action, status: true })
-      win.webContents.send('reloadDb', global.shared.dbList)
-    }
-  }
-  handleAction({ event, arg, openWin, relaodDb, jsonStorage, storeKey })[action]()
+  handleAction({ event, arg, openWin, relaodDb, handleError, jsonStorage, storeKey })[action]()
+})
+ipcMain.on('mongoReq', (event, arg) => {
+  const { action } = arg
+  mongoAction({ event, arg,handleError })[action]()
 })

@@ -16,6 +16,8 @@ import { Vue, Component } from 'vue-property-decorator'
 import ConnectedTree from '@/components/Connected/index.vue'
 import NewConnect from '@/components/NewConnect/index.vue'
 import History from '@/components/History/index.vue'
+const { ipcRenderer } = window.require('electron')
+import { mongo } from '@/type/ipc'
 
 @Component({
   components: {
@@ -25,6 +27,15 @@ import History from '@/components/History/index.vue'
   }
 })
 export default class App extends Vue {
+  created(){
+    ipcRenderer.on('connected', (event: any, arg: any) => {
+      this.$store.commit('ADD_DB',arg)
+    })
+    ipcRenderer.on('mongoRes', (event: any, arg: mongo) => {
+      this.$store.state.eventList.get(arg.eventId)(arg)
+      this.$store.state.eventList.delete(arg.eventId)
+    })
+  }
 }
 </script>
 
