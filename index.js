@@ -57,7 +57,7 @@ function createWindow() {
   })
   win.webContents.openDevTools();
   const menu = Menu.buildFromTemplate(menuTemplate)
-  Menu.setApplicationMenu(menu)
+  // Menu.setApplicationMenu(menu)
 }
 
 app.on('ready', createWindow)

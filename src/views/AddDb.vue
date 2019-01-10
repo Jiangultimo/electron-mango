@@ -33,7 +33,7 @@
 <script lang="ts">
 import mongoUtil,{mongoUri} from '@/utils/MongoUri'
 const { MongoClient } = window.require('mongodb')
-const { ipcRenderer, remote } = window.require('electron')
+const { remote } = window.require('electron')
 import { Component, Vue } from 'vue-property-decorator'
 import { notify } from '@/type/ipc'
 
@@ -70,7 +70,7 @@ export default class addDb extends Vue {
   }
   save () {
     this.form.uri = mongoUtil.format(this.params)
-    ipcRenderer.send('reqaction', this.form)
+    this.$ipc.send('reqaction', this.form)
   }
   created () {
     document.title = '添加连接'
@@ -91,12 +91,12 @@ export default class addDb extends Vue {
     }
   }
   mounted () {
-    ipcRenderer.on('resaction', (event:Error, arg:any) => {
+    this.$ipc.on('resaction', (event:Error, arg:any) => {
       if (arg.action === 'addDb' || arg.action === 'editDb') {
         window.close()
       }
     })
-    ipcRenderer.on('notify', (event:Error, arg:notify) => {
+    this.$ipc.on('notify', (event:Error, arg:notify) => {
       this.$message({
         type: arg.type || 'error',
         message: arg.message

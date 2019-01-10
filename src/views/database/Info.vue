@@ -1,26 +1,17 @@
 <template>
-  <div class="about">
-    <prev-route :prev="'/'" />
+  <div>
     <p>I'll show dabtabase info</p>
   </div>
 </template>
 
-<script>
-import PrevRoute from '@/components/PrevRoute/'
-export default {
-  components: {
-    PrevRoute
-  },
-  methods: {
-  }
+<script lang="ts">
+import { Vue, Component, Watch } from 'vue-property-decorator'
+
+@Component
+export default class dbInfo extends Vue {
+  
 }
 </script>
 
 <style lang="less" scoped>
-.about{
-  position: absolute;
-  top: 50%;
-  width: 100%;
-  text-align: center;
-}
 </style>

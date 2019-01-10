@@ -4,13 +4,12 @@
 </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Provide } from 'vue-property-decorator'
-const { remote, ipcRenderer } = window.require('electron')
+import { Vue, Component } from 'vue-property-decorator'
 
 @Component
 export default class Home extends Vue {
   newConnect () {
-    ipcRenderer.send('reqaction', { action: 'showAddDb' })
+    this.$ipc.send('reqaction', { action: 'showAddDb' })
   }
 }
 </script>
