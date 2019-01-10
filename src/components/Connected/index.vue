@@ -2,6 +2,7 @@
   <div class="connected">
     <h4>已链接</h4>
     <el-tree
+      ref="tree"
       :data="dbs"
       node-key="id"
       @node-click="click"
@@ -16,20 +17,30 @@
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { Link,TreeType,TreeNode,Collect,delimiter } from '@/type/database'
 import { mongo } from '@/type/ipc'
-import {TreeNode as ETreeNode} from 'element-ui/types/tree'
+import {TreeNode as ETreeNode } from 'element-ui/types/tree'
+
 @Component
 export default class ConnectTree extends Vue {
   dbs: Array<Link> = []
+  $refs!:{
+    tree:any
+  }
   defaultProps: Object = {
     children: 'child',
     label: 'name',
-    isLeaf: (data:TreeNode,node:any)=>{
+    isLeaf: (data:TreeNode)=>{
       return data.type==TreeType.Collect
     }
   }
   @Watch('treeTrance')
   onAllDBsChange() {
     this.dbs = [...this.$store.state.treeData.values()]
+    let obj=this.$refs.tree.store
+    this.$nextTick(()=>{
+      for (const x of this.$store.state.treeData.keys()) {
+        obj.getNode(x).expand()
+      }
+    })
   }
   get treeTrance () {
     return this.$store.state.treeTrance
@@ -64,6 +75,9 @@ export default class ConnectTree extends Vue {
       }
       this.$ipc.send('mongoReq', req)
     }else resolve([])
+  }
+  mounted(){
+    this.onAllDBsChange()
   }
 }
 </script>
