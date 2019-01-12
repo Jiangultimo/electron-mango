@@ -1,10 +1,5 @@
 <template>
   <div id="app">
-    <div class="navs">
-      <new-connect />
-      <connected-tree />
-      <history />
-    </div>
     <div class="content">
       <router-view/>
     </div>
@@ -13,18 +8,9 @@
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
-import ConnectedTree from '@/components/Connected/index.vue'
-import NewConnect from '@/components/NewConnect/index.vue'
-import History from '@/components/History/index.vue'
 import { mongo } from '@/type/ipc'
 
-@Component({
-  components: {
-    ConnectedTree,
-    NewConnect,
-    History
-  }
-})
+@Component
 export default class App extends Vue {
   created(){
     this.$ipc.on('connected', (event: any, arg: any) => {
@@ -62,13 +48,11 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-.navs{
-  width: 200px;
-  min-width: 200px;
-}
+
 .content{
   width: 100%;
   box-sizing: border-box;
+  display: flex;
   padding: 20px;
 }
 </style>
