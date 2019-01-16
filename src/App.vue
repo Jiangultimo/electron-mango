@@ -19,7 +19,7 @@ export default class App extends Vue {
     this.$ipc.on('mongoRes', (event: any, arg: mongo) => {
       let fun=this.$store.state.eventList.get(arg.eventId)
       if (fun){
-        fun(arg)
+        fun.handle(arg)
         this.$store.state.eventList.delete(arg.eventId)
       }
     })

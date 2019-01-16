@@ -15,6 +15,7 @@ declare module 'vue/types/vue' {
       on(channel: string, listener: Function):never
       send(channel:string,data:any):never
     }
+    _uid:number
   }
 }
 

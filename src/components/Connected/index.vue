@@ -1,8 +1,15 @@
 <template>
   <div class="connected">
-    <h4>已链接</h4>
-    <el-tree ref="tree" :data="dbs" node-key="id" @node-click="click" lazy :load="loadCollect" :props="defaultProps">
-    </el-tree>
+    <h4>已连接</h4>
+    <el-tree
+      ref="tree"
+      :data="dbs"
+      node-key="id"
+      @node-click="click"
+      lazy
+      :load="loadCollect"
+      :props="defaultProps"
+    ></el-tree>
   </div>
 </template>
 
@@ -28,7 +35,7 @@ import {
 
 @Component
 export default class ConnectTree extends Vue {
-  dbs: Array < Link > = []
+  dbs: Array<Link> = []
   $refs!: {
     tree: any
   }
@@ -54,24 +61,30 @@ export default class ConnectTree extends Vue {
   }
   click(data: TreeNode) {
     if (data.type == TreeType.Db) {
-
+      //@TODO 标签栏
+      this.$router.push(`/database/${data.id}/info`)
+    } else if (data.type == TreeType.Collect) {
+      //@TODO 标签栏
+      this.$router.push(`/collection/${data.id}/info`)
     }
   }
-  loadCollect(node: ETreeNode < any, TreeNode > , resolve: Function) {
+  loadCollect(node: ETreeNode<any, TreeNode>, resolve: Function) {
     if (node.data.type == TreeType.Link) {
       resolve(node.data.child)
     } else if (node.data.type == TreeType.Db) {
-      this.$store.commit('ADD_EVENT', (data: mongo) => {
-        let res = data.data.map((i: string): Collect => {
-          return {
-            id: data.link + delimiter + data.db + delimiter + i,
-            type: TreeType.Collect,
-            name: i,
-            sizeOnDisk: 0
-          }
-        })
-        resolve(res)
-      })
+      this.$store.commit('ADD_EVENT', {
+        vueId: this._uid,
+        handle: (data: mongo) => {
+          let res = data.data.map((i: string): Collect => {
+            return {
+              id: data.link + delimiter + data.db + delimiter + i,
+              type: TreeType.Collect,
+              name: i,
+              sizeOnDisk: 0
+            }
+          })
+          resolve(res)
+        }      })
 
       let arr = node.data.id.split(delimiter)
       const req: mongo = {
@@ -85,6 +98,9 @@ export default class ConnectTree extends Vue {
   }
   mounted() {
     this.onAllDBsChange()
+  }
+  beforeDestroy() {
+    this.$store.commit('OFF_EVENT', this._uid)
   }
 }
 </script>

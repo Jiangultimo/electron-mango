@@ -3,9 +3,11 @@
     <h4>已存连接</h4>
     <ul>
       <li v-for="(uri,name) in dbList" :key="name" @dblclick="connect(name)" class="history-item">
-        <span>{{name}}</span>
-        <i class="el-icon-edit" @click="editConnect(name)"></i>
-        <i class="el-icon-delete" @click="delConnect(name)"></i>
+        <span class="history-item-name">{{name}}</span>
+        <div>
+          <i class="el-icon-edit" @click="editConnect(name)"></i>
+          <i class="el-icon-delete" @click="delConnect(name)"></i>
+        </div>
       </li>
     </ul>
   </div>
@@ -60,7 +62,7 @@ export default class History extends Vue {
 .history {
   width: 100%;
   box-sizing: border-box;
-  ul{
+  ul {
     margin: 0;
     padding: 0;
   }
@@ -69,14 +71,14 @@ export default class History extends Vue {
     margin: 10px 0;
   }
 }
-.history-item{
+.history-item {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  span,i{
+  justify-content: space-between;
+  span,
+  i {
     margin-right: 10px;
   }
-  i{
+  i {
     cursor: pointer;
   }
 }

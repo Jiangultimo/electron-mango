@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>I'll show dabtabase info {{belong.db}}</p>
+    <p>I'll show collect info {{belong.collect}}</p>
   </div>
 </template>
 
@@ -9,15 +9,15 @@ import { Vue, Component, Watch } from 'vue-property-decorator'
 import { DbBelong, parserMongoStr } from '@/utils/utils'
 
 @Component
-export default class dbInfo extends Vue {
+export default class collectInfo extends Vue {
   belong:DbBelong={link:''}
 
   @Watch('$route.params.id')
-  changeDb(val:string){
+  changeCollect(val:string){
     this.belong=parserMongoStr(this.$route.params.id)
   }
   created(){
-    this.changeDb(this.$route.params.id)
+    this.changeCollect(this.$route.params.id)
   }
   beforeDestroy(){
     this.$store.commit('OFF_EVENT',this._uid)

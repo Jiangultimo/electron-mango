@@ -4,7 +4,6 @@
       <nav-tree />
     </div>
     <div class="home">
-      <h1>Hello, welcome to join electron-mango!</h1>
       <router-view />
     </div>
   </div>

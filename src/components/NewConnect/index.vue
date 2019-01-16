@@ -30,7 +30,7 @@ export default class Home extends Vue {
   .new-btn {
     display: block;
     box-sizing: border-box;
-    padding: 30px 20px;
+    padding: 20px 20px;
     color: #666;
     text-decoration: none;
     text-align: center;
