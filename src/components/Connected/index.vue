@@ -6,6 +6,7 @@
       :data="dbs"
       node-key="id"
       @node-click="click"
+      :expand-on-click-node="false"
       lazy
       :load="loadCollect"
       :props="defaultProps"
@@ -24,8 +25,8 @@ import {
   TreeType,
   TreeNode,
   Collect,
-  delimiter
 } from '@/type/database'
+import { delimiter } from "@/utils/utils"
 import {
   mongo
 } from '@/type/ipc'
@@ -59,13 +60,20 @@ export default class ConnectTree extends Vue {
   get treeTrance() {
     return this.$store.state.treeTrance
   }
-  click(data: TreeNode) {
+  click(data: TreeNode, node: any) {
     if (data.type == TreeType.Db) {
       //@TODO 标签栏
-      this.$router.push(`/database/${data.id}/info`)
+      if (data.child) {
+        this.$router.push(`/database/${data.id}/info`)
+      } else {
+        //自动触发加载、跳转
+        node.expand()
+      }
     } else if (data.type == TreeType.Collect) {
       //@TODO 标签栏
       this.$router.push(`/collection/${data.id}/info`)
+    } else {
+      node.expanded ? node.collapse() : node.expand()
     }
   }
   loadCollect(node: ETreeNode<any, TreeNode>, resolve: Function) {
@@ -75,15 +83,17 @@ export default class ConnectTree extends Vue {
       this.$store.commit('ADD_EVENT', {
         vueId: this._uid,
         handle: (data: mongo) => {
-          let res = data.data.map((i: string): Collect => {
-            return {
+          let child = new Map<string, Collect>()
+          for (const i of data.data) {
+            child.set(i, {
               id: data.link + delimiter + data.db + delimiter + i,
               type: TreeType.Collect,
-              name: i,
-              sizeOnDisk: 0
-            }
-          })
-          resolve(res)
+              name: i
+            })
+          }
+          node.data.child = child
+          this.$router.push(`/database/${node.data.id}/info`)
+          resolve([...child.values()])
         }      })
 
       let arr = node.data.id.split(delimiter)

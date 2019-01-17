@@ -48,17 +48,6 @@ module.exports = ({
       openWin('http://localhost:3000/#/database/add')
     }
   },
-  'getCollects'() {
-    const { shared: { dbClient } } = global
-    console.log('fuck');
-
-    const client = dbClient[arg.link]
-    client.db(arg.db).collections()
-      .then((val) => {
-        arg.data = val
-        event.sender.send('mongoRes', arg)
-      })
-  },
   'connect'() {
     const { shared: { dbList, dbClient } } = global
     const { name } = arg
@@ -84,6 +73,7 @@ module.exports = ({
           event.sender.send('connected', { name, dbs: res.databases })
         })
         .catch(() => {
+          //for mongodb<4.0, cannot use admin()
           client.db(dbName).stats()
             .then((val) => {
               let allDBs = [{ 'name': val.db, 'sizeOnDisk': val.dataSize }]

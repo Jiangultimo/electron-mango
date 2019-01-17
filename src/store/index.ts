@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { Link, DbInfo, TreeType, delimiter, MongoEvent } from '../type/database'
+import { Link, DbInfo, TreeType, MongoEvent } from '../type/database'
+import { delimiter } from "@/utils/utils"
 
 interface State {
   treeTrance: number
@@ -33,20 +34,20 @@ export default new Vuex.Store({
       }
     },
     ADD_DB(state: State, { dbs, name }) {
-      dbs = dbs.map((db: any): DbInfo => {
-        return {
+      let child = new Map<string, DbInfo>()
+      for (const db of dbs) {
+        child.set(db.name,{
           id: `${name}${delimiter}${db.name}`,
           name: db.name,
           type: TreeType.Db,
           sizeOnDisk: parseFloat((db.sizeOnDisk / 1024).toFixed(2)),
-          child: []
-        }
-      })
+        })
+      }
       const link: Link = {
         id: name,
         name: name,
         type: TreeType.Link,
-        child: dbs
+        child
       }
       state.treeData.set(name, link)
       state.treeTrance++
