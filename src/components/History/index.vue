@@ -40,7 +40,7 @@ export default class History extends Vue {
     })
   }
   connect(name: string): void {
-    if (name in this.$store.state.treeData) {
+    if (name in this.$store.state.db.treeData) {
       return // 已经连接了
     }
     this.$ipc.send('reqaction', {

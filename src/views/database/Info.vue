@@ -26,7 +26,7 @@ export default class dbInfo extends Vue {
   @Watch('$route.params.id')
   changeDb(val: string) {
     this.belong = parserMongoStr(this.$route.params.id)
-    this.data = [...this.$store.state.treeData.get(this.belong.link).child.get(this.belong.db).child.values()]
+    this.data = [...this.$store.state.db.treeData.get(this.belong.link).child.get(this.belong.db).child.values()]
   }
 
   jump(name:string){

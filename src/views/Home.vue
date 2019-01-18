@@ -1,10 +1,11 @@
 <template>
   <div style="display: flex;">
     <div class="navs">
-      <nav-tree />
+      <nav-tree/>
     </div>
     <div class="home">
-      <router-view />
+      <tabs/>
+      <router-view/>
     </div>
   </div>
 </template>
@@ -15,13 +16,14 @@ import {
   Component
 } from 'vue-property-decorator'
 import NavTree from '@/components/Nav/index.vue'
+import Tabs from '@/components/Tabs/index.vue'
 
 @Component({
   components: {
-    NavTree
+    NavTree, Tabs
   }
 })
-export default class Blank extends Vue {}
+export default class Blank extends Vue { }
 </script>
 
 <style lang="less" scoped>

@@ -49,29 +49,27 @@ export default class ConnectTree extends Vue {
   }
   @Watch('treeTrance')
   onAllDBsChange() {
-    this.dbs = [...this.$store.state.treeData.values()]
+    this.dbs = [...this.$store.state.db.treeData.values()]
     let obj = this.$refs.tree.store
     this.$nextTick(() => {
-      for (const x of this.$store.state.treeData.keys()) {
+      for (const x of this.$store.state.db.treeData.keys()) {
         obj.getNode(x).expand()
       }
     })
   }
   get treeTrance() {
-    return this.$store.state.treeTrance
+    return this.$store.state.db.treeTrance
   }
   click(data: TreeNode, node: any) {
     if (data.type == TreeType.Db) {
-      //@TODO 标签栏
       if (data.child) {
-        this.$router.push(`/database/${data.id}/info`)
+        this.$store.commit('ADD_TAB', { name: data.name, path: `/database/${data.id}/info` })
       } else {
         //自动触发加载、跳转
         node.expand()
       }
     } else if (data.type == TreeType.Collect) {
-      //@TODO 标签栏
-      this.$router.push(`/collection/${data.id}/info`)
+      this.$store.commit('ADD_TAB', { name: data.name, path: `/collection/${data.id}/info` })
     } else {
       node.expanded ? node.collapse() : node.expand()
     }
@@ -92,14 +90,14 @@ export default class ConnectTree extends Vue {
             })
           }
           node.data.child = child
-          this.$router.push(`/database/${node.data.id}/info`)
+          this.$store.commit('ADD_TAB', { name: node.data.name, path: `/database/${node.data.id}/info` })
           resolve([...child.values()])
         }      })
 
       let arr = node.data.id.split(delimiter)
       const req: mongo = {
         action: 'getCollects',
-        eventId: this.$store.state.eventId,
+        eventId: this.$store.state.db.eventId,
         link: arr[0],
         db: arr[1]
       }

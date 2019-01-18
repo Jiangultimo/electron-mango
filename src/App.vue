@@ -17,10 +17,10 @@ export default class App extends Vue {
       this.$store.commit('ADD_DB',arg)
     })
     this.$ipc.on('mongoRes', (event: any, arg: mongo) => {
-      let fun=this.$store.state.eventList.get(arg.eventId)
+      let fun=this.$store.state.db.eventList.get(arg.eventId)
       if (fun){
         fun.handle(arg)
-        this.$store.state.eventList.delete(arg.eventId)
+        this.$store.state.db.eventList.delete(arg.eventId)
       }
     })
     this.$ipc.on('notify', (event: any, arg: any) => {
