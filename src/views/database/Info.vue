@@ -2,7 +2,9 @@
   <div>
     <el-table :data="data" border :stripe="true">
       <el-table-column align="center" prop="name" label="名称"/>
+      <el-table-column align="center" prop="count" label="数据量"/>
       <el-table-column align="center" prop="sizeOnDisk" label="占用空间"/>
+      <el-table-column align="center" prop="totalIndexSize" label="索引占用空间"/>
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
           <el-button type="primary" @click="jump(scope.row.name)" icon="el-icon-document"></el-button>

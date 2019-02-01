@@ -83,10 +83,13 @@ export default class ConnectTree extends Vue {
         handle: (data: mongo) => {
           let child = new Map<string, Collect>()
           for (const i of data.data) {
-            child.set(i, {
-              id: data.link + delimiter + data.db + delimiter + i,
+            child.set(i.name, {
+              id: data.link + delimiter + data.db + delimiter + i.name,
               type: TreeType.Collect,
-              name: i
+              count: i.count,
+              sizeOnDisk: i.sizeOnDisk,
+              totalIndexSize: i.totalIndexSize,
+              name: i.name
             })
           }
           node.data.child = child

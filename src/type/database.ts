@@ -6,7 +6,9 @@ export interface TreeNode {
 }
 
 export interface Collect extends TreeNode {
-  sizeOnDisk?: number
+  sizeOnDisk: number
+  count: number
+  totalIndexSize: number
 }
 
 export interface DbInfo extends TreeNode {
