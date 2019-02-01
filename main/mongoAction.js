@@ -3,6 +3,18 @@ module.exports = ({
   arg,
   handleError
 }) => ({
+  find() {
+    const client = global.shared.dbClient[arg.link]
+    const table = client.db(arg.db).collection(arg.collect)
+    let fitter = arg.data.fitter
+    delete arg.data.fitter
+    table.find(fitter, arg.data)
+      .toArray()
+      .then((data) => {
+        arg.data = data
+        event.sender.send('mongoRes', arg)
+      })
+  },
   getCollects() {
     const client = global.shared.dbClient[arg.link]
     client.db(arg.db).collections()
