@@ -1,8 +1,28 @@
+const { ObjectID } = require('mongodb')
+const { serialize } = require('mongodb-extended-json')
 module.exports = ({
   event,
   arg,
   handleError
 }) => ({
+  del() {
+    const client = global.shared.dbClient[arg.link]
+    const table = client.db(arg.db).collection(arg.collect)
+    table.deleteOne({ '_id': ObjectID(arg.data) })
+      .then((data) => {
+        arg.data = data.deletedCount
+        event.sender.send('mongoRes', arg)
+      })
+  },
+  deleteMany() {
+    const client = global.shared.dbClient[arg.link]
+    const table = client.db(arg.db).collection(arg.collect)
+    table.deleteMany(arg.data)
+      .then((data) => {
+        arg.data = data.deletedCount
+        event.sender.send('mongoRes', arg)
+      })
+  },
   find() {
     const client = global.shared.dbClient[arg.link]
     const table = client.db(arg.db).collection(arg.collect)
@@ -11,7 +31,7 @@ module.exports = ({
     table.find(fitter, arg.data)
       .toArray()
       .then((data) => {
-        arg.data = data
+        arg.data = data.map((v) => serialize(v))
         event.sender.send('mongoRes', arg)
       })
   },

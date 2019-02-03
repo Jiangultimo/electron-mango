@@ -5,3 +5,6 @@ declare module '*.vue' {
 declare module 'mongodb-query-parser' {
   export function parseFilter(str:string):any
 }
+declare module 'mongodb-extended-json' {
+  export function stringify(obj:Object):string
+}
