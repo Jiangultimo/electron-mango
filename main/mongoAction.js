@@ -1,10 +1,29 @@
 const { ObjectID } = require('mongodb')
-const { serialize } = require('mongodb-extended-json')
+const { serialize,parse } = require('mongodb-extended-json')
 module.exports = ({
   event,
   arg,
   handleError
 }) => ({
+  mod() {
+    const client = global.shared.dbClient[arg.link]
+    const table = client.db(arg.db).collection(arg.collect)
+    table.updateOne({ '_id': ObjectID(arg.data.id) },{'$set':parse(arg.data.data)})
+      .then((data) => {
+        arg.data = {}
+        event.sender.send('mongoRes', arg)
+      })
+  },
+  modMany() {
+    const client = global.shared.dbClient[arg.link]
+    const table = client.db(arg.db).collection(arg.collect)
+    table.updateMany(arg.data.where,arg.data.update)
+      .then((data) => {
+        console.log(data);
+        arg.data = {}
+        event.sender.send('mongoRes', arg)
+      })
+  },
   del() {
     const client = global.shared.dbClient[arg.link]
     const table = client.db(arg.db).collection(arg.collect)

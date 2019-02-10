@@ -55,9 +55,19 @@
     <ul>
       <li v-for="(v,i) in data" :key="i">
         {{JSON.stringify(v)}}
-        <el-button type="danger" @click="del(v)" icon="el-icon-del">删除</el-button>
+        <el-button type="primary" @click="mod(v)" icon="el-icon-edit">修改</el-button>
+        <el-button type="danger" @click="del(v)" icon="el-icon-delete">删除</el-button>
       </li>
     </ul>
+    <el-dialog title="修改数据" :visible.sync="modData.show">
+      <div>
+        <el-input type="textarea" v-model="modData.data"></el-input>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="modData.show = false">取 消</el-button>
+        <el-button type="primary" @click="subMod">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -107,14 +117,19 @@ export default class collectInfo extends Vue {
   newProject: project = { show: false, value: '', display: displayType.display }
   newSort: sort = { show: false, name: '', sort: sortType.asc }
   data: Array<Object> = []
+  modData = {
+    show: false,
+    id: '',
+    data: ''
+  }
 
   del(obj: any) {
     if ('_id' in obj) {
-      let data =obj['_id']['$oid']
+      let data = obj['_id']['$oid']
       this.$store.commit('ADD_EVENT', {
         vueId: this._uid,
         handle: (data: mongo) => {
-          let delNum=data.data
+          let delNum = data.data
           this.$message.success(`已删除${delNum}条记录`)
           this.search()
         }      })
@@ -124,9 +139,38 @@ export default class collectInfo extends Vue {
         data
       }, this.belong)
       this.$ipc.send('mongoReq', req)
-    }else{
+    } else {
       this.$message.error('没有找到_id，无法操作！')
     }
+  }
+
+  /**
+   * 打开修改模态框
+   */
+  mod(val: any) {
+    if ('_id' in val) {
+      this.modData.id = val['_id']['$oid']
+      this.modData.data = JSON.stringify(val)
+      this.modData.show = true
+    } else {
+      this.$message.error('没有找到_id，无法操作！')
+    }
+  }
+
+  subMod() {
+    this.$store.commit('ADD_EVENT', {
+      vueId: this._uid,
+      handle: (data: mongo) => {
+        this.$message.success(`修改成功！`)
+        this.modData.show = false
+        this.search()
+      }    })
+    const req: mongo = Object.assign({
+      action: 'mod',
+      eventId: this.$store.state.db.eventId,
+      data: this.modData
+    }, this.belong)
+    this.$ipc.send('mongoReq', req)
   }
 
   projectConfirm() {
@@ -176,6 +220,7 @@ export default class collectInfo extends Vue {
   }
   created() {
     this.changeCollect(this.$route.params.id)
+    this.search()
   }
   beforeDestroy() {
     this.$store.commit('OFF_EVENT', this._uid)
