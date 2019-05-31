@@ -1,11 +1,11 @@
 <template>
   <div style="display: flex;">
     <div class="navs">
-      <nav-tree/>
+      <nav-tree />
     </div>
     <div class="home">
-      <tabs/>
-      <router-view/>
+      <tabs />
+      <router-view />
     </div>
   </div>
 </template>
@@ -20,10 +20,11 @@ import Tabs from '@/components/Tabs/index.vue'
 
 @Component({
   components: {
-    NavTree, Tabs
+    NavTree,
+    Tabs
   }
 })
-export default class Blank extends Vue { }
+export default class Blank extends Vue {}
 </script>
 
 <style lang="less" scoped>

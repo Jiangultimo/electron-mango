@@ -1,10 +1,11 @@
+// electron entry file
 const { app, BrowserWindow, ipcMain, Menu } = require('electron')
 const jsonStorage = require('electron-json-storage')
 const storeKey = 'dbList'
 const handleAction = require('./main/action')
 const mongoAction = require('./main/mongoAction')
 global.shared = {
-  dbClient:{},
+  dbClient: {},
   dbList: {}
 }
 let win = null
@@ -87,5 +88,5 @@ ipcMain.on('reqaction', (event, arg) => {
 })
 ipcMain.on('mongoReq', (event, arg) => {
   const { action } = arg
-  mongoAction({ event, arg,handleError })[action]()
+  mongoAction({ event, arg, handleError })[action]()
 })

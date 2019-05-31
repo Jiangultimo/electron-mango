@@ -1,24 +1,29 @@
 <template>
   <div id="app">
     <div class="content">
-      <router-view/>
+      <router-view />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
-import { mongo } from '@/type/ipc'
+import {
+  Vue,
+  Component
+} from 'vue-property-decorator'
+import {
+  mongo
+} from '@/type/ipc'
 
 @Component
 export default class App extends Vue {
-  created(){
+  created() {
     this.$ipc.on('connected', (event: any, arg: any) => {
-      this.$store.commit('ADD_DB',arg)
+      this.$store.commit('ADD_DB', arg)
     })
     this.$ipc.on('mongoRes', (event: any, arg: mongo) => {
-      let fun=this.$store.state.db.eventList.get(arg.eventId)
-      if (fun){
+      let fun = this.$store.state.db.eventList.get(arg.eventId)
+      if (fun) {
         fun.handle(arg)
         this.$store.state.db.eventList.delete(arg.eventId)
       }
@@ -34,11 +39,13 @@ export default class App extends Vue {
 </script>
 
 <style lang="less">
-html, body {
+html,
+body {
   padding: 0;
   margin: 0;
   height: 100%;
 }
+
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   box-sizing: border-box;
@@ -49,7 +56,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.content{
+.content {
   width: 100%;
   box-sizing: border-box;
   display: flex;

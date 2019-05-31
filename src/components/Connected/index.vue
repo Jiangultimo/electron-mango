@@ -1,16 +1,7 @@
 <template>
   <div class="connected">
     <h4>已连接</h4>
-    <el-tree
-      ref="tree"
-      :data="dbs"
-      node-key="id"
-      @node-click="click"
-      :expand-on-click-node="false"
-      lazy
-      :load="loadCollect"
-      :props="defaultProps"
-    ></el-tree>
+    <el-tree ref="tree" :data="dbs" node-key="id" @node-click="click" :expand-on-click-node="false" lazy :load="loadCollect" :props="defaultProps"></el-tree>
   </div>
 </template>
 
@@ -26,7 +17,9 @@ import {
   TreeNode,
   Collect,
 } from '@/type/database'
-import { delimiter } from "@/utils/utils"
+import {
+  delimiter
+} from "@/utils/utils"
 import {
   mongo
 } from '@/type/ipc'
@@ -36,7 +29,7 @@ import {
 
 @Component
 export default class ConnectTree extends Vue {
-  dbs: Array<Link> = []
+  dbs: Array < Link > = []
   $refs!: {
     tree: any
   }
@@ -63,25 +56,32 @@ export default class ConnectTree extends Vue {
   click(data: TreeNode, node: any) {
     if (data.type == TreeType.Db) {
       if (data.child) {
-        this.$store.commit('ADD_TAB', { name: data.name, path: `/database/${data.id}/info` })
+        this.$store.commit('ADD_TAB', {
+          name: data.name,
+          path: `/database/${data.id}/info`
+        })
       } else {
         //自动触发加载、跳转
         node.expand()
       }
     } else if (data.type == TreeType.Collect) {
-      this.$store.commit('ADD_TAB', { name: data.name, path: `/collection/${data.id}/info` })
+      this.$store.commit('ADD_TAB', {
+        name: data.name,
+        path: `/collection/${data.id}/info`
+      })
     } else {
       node.expanded ? node.collapse() : node.expand()
     }
   }
-  loadCollect(node: ETreeNode<any, TreeNode>, resolve: Function) {
+  loadCollect(node: ETreeNode < any, TreeNode > , resolve: Function) {
     if (node.data.type == TreeType.Link) {
       resolve(node.data.child)
     } else if (node.data.type == TreeType.Db) {
       this.$store.commit('ADD_EVENT', {
         vueId: this._uid,
         handle: (data: mongo) => {
-          let child = new Map<string, Collect>()
+          let child = new Map < string,
+            Collect > ()
           for (const i of data.data) {
             child.set(i.name, {
               id: data.link + delimiter + data.db + delimiter + i.name,
@@ -93,9 +93,13 @@ export default class ConnectTree extends Vue {
             })
           }
           node.data.child = child
-          this.$store.commit('ADD_TAB', { name: node.data.name, path: `/database/${node.data.id}/info` })
+          this.$store.commit('ADD_TAB', {
+            name: node.data.name,
+            path: `/database/${node.data.id}/info`
+          })
           resolve([...child.values()])
-        }      })
+        }
+      })
 
       let arr = node.data.id.split(delimiter)
       const req: mongo = {

@@ -62,22 +62,27 @@ export default class History extends Vue {
 .history {
   width: 100%;
   box-sizing: border-box;
+
   ul {
     margin: 0;
     padding: 0;
   }
+
   h4 {
     text-align: center;
     margin: 10px 0;
   }
 }
+
 .history-item {
   display: flex;
   justify-content: space-between;
+
   span,
   i {
     margin-right: 10px;
   }
+
   i {
     cursor: pointer;
   }

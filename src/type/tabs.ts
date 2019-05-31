@@ -1,4 +1,4 @@
-export interface tab{
-	name: string
-	path: string
+export interface tab {
+  name: string
+  path: string
 }
