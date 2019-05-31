@@ -28,6 +28,11 @@ export default new Router({
       component: () => import('@/views/AddDb.vue')
     },
     {
+      path: '/connected',
+      name: 'connected',
+      component: () => import('@/views/Connected.vue')
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import('@/views/About.vue')

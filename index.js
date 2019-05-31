@@ -83,6 +83,7 @@ const handleError = (err, event) => {
   })
 }
 ipcMain.on('reqaction', (event, arg) => {
+  console.log('reqaction', arg)
   const { action } = arg
   handleAction({ event, arg, openWin, relaodDb, handleError, jsonStorage, storeKey })[action]()
 })

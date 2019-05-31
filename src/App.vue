@@ -1,5 +1,8 @@
 <template>
   <div id="app">
+    <div class="navs">
+      <nav-tree />
+    </div>
     <div class="content">
       <router-view />
     </div>
@@ -7,6 +10,7 @@
 </template>
 
 <script lang="ts">
+import NavTree from '@/components/Nav/index.vue'
 import {
   Vue,
   Component
@@ -15,7 +19,11 @@ import {
   mongo
 } from '@/type/ipc'
 
-@Component
+@Component({
+  components: {
+    NavTree
+  }
+})
 export default class App extends Vue {
   created() {
     this.$ipc.on('connected', (event: any, arg: any) => {
@@ -61,5 +69,11 @@ body {
   box-sizing: border-box;
   display: flex;
   padding: 20px;
+}
+
+.navs {
+  width: 200px;
+  min-width: 200px;
+  height: 100%;
 }
 </style>

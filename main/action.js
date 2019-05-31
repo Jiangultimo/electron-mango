@@ -40,6 +40,7 @@ module.exports = ({
       dbList[arg.name] = arg.uri
       jsonStorage.set(storeKey, dbList, relaodDb)
     }
+    event.sender.send('added', dbList)
   },
   'showAddDb'() {
     if ('name' in arg) {
