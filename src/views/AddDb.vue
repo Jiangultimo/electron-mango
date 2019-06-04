@@ -31,26 +31,15 @@
 </template>
 
 <script lang="ts">
-import mongoUtil, {
-  mongoUri
-} from '@/utils/MongoUri'
-const {
-  MongoClient
-} = window.require('mongodb')
-const {
-  remote
-} = window.require('electron')
-import {
-  Component,
-  Vue
-} from 'vue-property-decorator'
-import {
-  notify
-} from '@/type/ipc'
+import mongoUtil,{mongoUri} from '@/utils/MongoUri'
+const { MongoClient } = window.require('mongodb')
+const { remote } = window.require('electron')
+import { Component, Vue } from 'vue-property-decorator'
+import { notify } from '@/type/ipc'
 
 @Component
 export default class addDb extends Vue {
-  params: mongoUri = {
+  params:mongoUri= {
     username: '',
     password: '',
     hosts: {
@@ -66,14 +55,12 @@ export default class addDb extends Vue {
     name: 'localhost',
     uri: ''
   }
-  test() {
+  test () {
     this.form.uri = mongoUtil.format(this.params)
-    var client = new MongoClient(this.form.uri, {
-      useNewUrlParser: true
-    })
-    client.connect((err: Error) => {
+    var client = new MongoClient(this.form.uri, { useNewUrlParser: true })
+    client.connect((err:Error) => {
       if (err != null) {
-        this.$message.error(err.message)
+        this.$message.error('链接失败，请检查是否打开MongoDB')
         return false
       } else {
         client.close()
@@ -81,11 +68,11 @@ export default class addDb extends Vue {
       }
     })
   }
-  save() {
+  save () {
     this.form.uri = mongoUtil.format(this.params)
     this.$ipc.send('reqaction', this.form)
   }
-  created() {
+  created () {
     document.title = '添加连接'
     if ('key' in this.$route.params) {
       const key = this.$route.params.key
@@ -103,13 +90,13 @@ export default class addDb extends Vue {
       }
     }
   }
-  mounted() {
-    this.$ipc.on('resaction', (event: Error, arg: any) => {
+  mounted () {
+    this.$ipc.on('resaction', (event:Error, arg:any) => {
       if (arg.action === 'addDb' || arg.action === 'editDb') {
         window.close()
       }
     })
-    this.$ipc.on('notify', (event: Error, arg: notify) => {
+    this.$ipc.on('notify', (event:Error, arg:notify) => {
       this.$message({
         type: arg.type || 'error',
         message: arg.message
@@ -123,7 +110,7 @@ export default class addDb extends Vue {
 </script>
 
 <style lang="less" scoped>
-.connect {
+.connect{
   width: 600px;
   display: block;
   margin: 0 auto;

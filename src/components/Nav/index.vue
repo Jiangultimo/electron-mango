@@ -5,9 +5,9 @@
     <history /> -->
     <el-row class="tac">
       <el-col :span="24">
-        <h5>Vue Electron MongoDB</h5>
+        <h5 class="title">Vue Electron MongoDB</h5>
         <el-menu default-active="2" class="el-menu-vertical-demo" background-color="#545c64" text-color="#fff" active-text-color="#ffd04b">
-          <el-menu-item v-for="(item, index) in navConfig" :key="item.key" :index="String(index)" @click="handleJump(item.path)">
+          <el-menu-item v-for="(item, index) in navConfig" :key="item.key" :index="String(index)" @click="handleJump(item.path)" style="text-align: center;">
             <span slot="title">{{item.label}}</span>
           </el-menu-item>
         </el-menu>
@@ -48,5 +48,8 @@ export default class Nav extends Vue {
 .nav {
   display: flex;
   flex-direction: column;
+}
+.title{
+  text-align: center;
 }
 </style>
