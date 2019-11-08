@@ -2,7 +2,7 @@
   <div>
     <el-form label-width="80px">
       <el-form-item label="fitter">
-        <el-input v-model="query.fitter"/>
+        <el-input v-model="query.fitter" />
       </el-form-item>
       <el-form-item label="project">
         <el-tag
@@ -15,16 +15,18 @@
         <el-input
           v-if="newProject.show"
           v-model="newProject.value"
+          ref="newProject"
           @keyup.enter.native="projectConfirm"
+          @keyup.esc.native="newProject.show=false"
         >
           <template slot="append">
-            <el-select v-model="newProject.display">
-              <el-option label="显示" :value="1"/>
-              <el-option label="隐藏" :value="-1"/>
+            <el-select style="width:90px" v-model="newProject.display">
+              <el-option label="显示" :value="1" />
+              <el-option label="隐藏" :value="-1" />
             </el-select>
           </template>
         </el-input>
-        <el-button v-else @click="newProject.show=true" icon="el-icon-plus">project</el-button>
+        <el-button v-else @click="showProject" icon="el-icon-plus">project</el-button>
       </el-form-item>
       <el-form-item label="sort">
         <el-tag
@@ -34,21 +36,27 @@
           :disable-transitions="false"
           @close="removeSort(k)"
         >{{v==1?'升序':'降序'}} {{k}}</el-tag>
-        <el-input v-if="newSort.show" v-model="newSort.name" @keyup.enter.native="sortConfirm">
+        <el-input
+          v-if="newSort.show"
+          v-model="newSort.name"
+          ref="newSort"
+          @keyup.enter.native="sortConfirm"
+          @keyup.esc.native="newSort.show=false"
+        >
           <template slot="append">
             <el-select v-model="newSort.sort">
-              <el-option label="升序" :value="1"/>
-              <el-option label="降序" :value="-1"/>
+              <el-option label="升序" :value="1" />
+              <el-option label="降序" :value="-1" />
             </el-select>
           </template>
         </el-input>
-        <el-button v-else @click="newSort.show=true" icon="el-icon-plus">sort</el-button>
+        <el-button v-else @click="showSort" icon="el-icon-plus">sort</el-button>
       </el-form-item>
       <el-form-item label="skip">
-        <el-input v-model.number="query.skip"/>
+        <el-input v-model.number="query.skip" />
       </el-form-item>
       <el-form-item label="limit">
-        <el-input v-model.number="query.limit"/>
+        <el-input v-model.number="query.limit" />
       </el-form-item>
     </el-form>
     <el-button type="primary" @click="search" icon="el-icon-search">查找</el-button>
@@ -77,6 +85,7 @@ import { Vue, Component, Watch } from 'vue-property-decorator'
 import { DbBelong, parserMongoStr } from '@/utils/utils'
 import { parseFilter } from "mongodb-query-parser"
 import { mongo } from '@/type/ipc'
+import _ from 'lodash'
 enum sortType {
   asc = 1,
   desc = -1
@@ -113,7 +122,7 @@ const QUERY: queryObj = {
 @Component
 export default class collectInfo extends Vue {
   belong: DbBelong = { link: '' }
-  query: queryObj = Object.assign({}, QUERY)
+  query: queryObj = _.cloneDeep(QUERY)
   newProject: project = { show: false, value: '', display: displayType.display }
   newSort: sort = { show: false, name: '', sort: sortType.asc }
   data: Array<Object> = []
@@ -173,15 +182,22 @@ export default class collectInfo extends Vue {
     this.$ipc.send('mongoReq', req)
   }
 
+  showProject() {
+    this.newProject.show = true
+    this.$nextTick(()=>(this.$refs['newProject'] as Vue).focus())
+  }
   projectConfirm() {
     if (this.newProject.value != '') {
       this.$set(this.query.projection, this.newProject.value, this.newProject.display)
     }
-    this.newProject = { show: false, value: '', display: 1 }
+    this.newProject = { show: false, value: '', display: displayType.display }
   }
   removeProject(key: string) {
-    delete this.query.projection[key]
-    this.query.projection = Object.assign({}, this.query.projection)
+    this.$delete(this.query.projection, key)
+  }
+  showSort() {
+    this.newSort.show = true
+    this.$nextTick(()=>(this.$refs['newSort'] as Vue).focus())
   }
   sortConfirm() {
     if (this.newSort.name != '') {
@@ -190,12 +206,12 @@ export default class collectInfo extends Vue {
     this.newSort = { show: false, name: '', sort: sortType.asc }
   }
   removeSort(key: string) {
-    delete this.query.sort[key]
-    this.query.sort = Object.assign({}, this.query.sort)
+    this.$delete(this.query.sort, key)
   }
   @Watch('$route.params.id')
   changeCollect(val: string) {
-    this.belong = parserMongoStr(this.$route.params.id)
+    this.belong = parserMongoStr(val)
+    this.search()
   }
   search() {
     let query = Object.assign({}, this.query)
@@ -218,12 +234,36 @@ export default class collectInfo extends Vue {
     }, this.belong)
     this.$ipc.send('mongoReq', req)
   }
-  created() {
-    this.changeCollect(this.$route.params.id)
-    this.search()
-  }
   beforeDestroy() {
     this.$store.commit('OFF_EVENT', this._uid)
+  }
+  mounted() {
+    if (!this.$store.state.tab.restore){
+      //如果没有存数据，初始化
+      this.changeCollect(this.$route.params.id)
+    }
+    this.$store.commit('REG_CALLBACK', { cid: this._uid, callback: { save: this.save, restore: this.restore } })
+  }
+  save() {
+    let res = {
+      query: _.cloneDeep(this.query),
+      newProject: _.cloneDeep(this.newProject),
+      newSort: _.cloneDeep(this.newSort),
+    }
+    return res
+  }
+  restore(info: any) {
+    if (!_.isEmpty(info)) {
+      this.query = info.query
+      this.newProject = info.newProject
+      this.newSort = info.newSort
+    } else {
+      //新开的页面，需要重新初始化
+      this.query = _.cloneDeep(QUERY)
+      this.newProject = { show: false, value: '', display: displayType.display }
+      this.newSort = { show: false, name: '', sort: sortType.asc }
+    }
+    this.changeCollect(this.$route.params.id)
   }
 }
 </script>

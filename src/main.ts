@@ -12,17 +12,18 @@ declare global {
 declare module 'vue/types/vue' {
   interface Vue {
     $ipc: {
-      on(channel: string, listener: Function):never
-      send(channel:string,data:any):never
+      on(channel: string, listener: Function): never
+      send(channel: string, data: any): never
     }
-    _uid:number
+    _uid: number
+    focus(): void
   }
 }
 
 Vue.use(ElementUI)
 
 Vue.config.productionTip = false
-Vue.prototype.$ipc =ipcRenderer
+Vue.prototype.$ipc = ipcRenderer
 
 new Vue({
   router,

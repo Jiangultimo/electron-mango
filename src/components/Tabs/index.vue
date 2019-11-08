@@ -21,17 +21,20 @@ export default class Tabs extends Vue {
     return this.$store.state.tab.tabs
   }
   @Watch('active')
-  onTabChange(val: string,oldVal:string){
+  onTabChange(val: string, oldVal: string) {
     let path = '/'
     if (val != '') {
       for (const i of this.tabs) {
         if (i.name == val) {
-          path=i.path
-        }else if (i.name==oldVal){
-          i.path=this.$route.fullPath
+          path = i.path
+        } else if (i.name == oldVal) {
+          i.path = this.$route.fullPath
         }
       }
     }//等于空代表tabs已经没了，不需要设置原标签地址
+    let ori = this.$router.getMatchedComponents().pop()
+    let now = this.$router.getMatchedComponents(path).pop()
+    this.$store.commit('CHANGE_TAB', { to: val,from:oldVal, modComponent: ori != now })
     this.$router.push(path)
   }
   @Watch('activeName')
