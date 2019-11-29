@@ -38,7 +38,14 @@ const menuTemplate = [
 ]
 
 function openWin(url) {
-  let newWin = new BrowserWindow({ show: false, parent: win, autoHideMenuBar: true })
+  let newWin = new BrowserWindow({
+    show: false,
+    parent: win,
+    autoHideMenuBar: true,
+    webPreferences: {
+      nodeIntegration: true,
+    }
+  })
   newWin.once('ready-to-show', () => {
     newWin.show()
   })
@@ -49,7 +56,10 @@ function openWin(url) {
 function createWindow() {
   win = new BrowserWindow({
     width: 1200,
-    height: 720
+    height: 720,
+    webPreferences: {
+      nodeIntegration: true,
+    },
   })
   win.loadURL('http://localhost:3000/')
   win.on('closed', function () {
