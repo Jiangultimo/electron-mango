@@ -60,13 +60,25 @@
       </el-form-item>
     </el-form>
     <el-button type="primary" @click="search" icon="el-icon-search">查找</el-button>
-    <ul>
-      <li v-for="(v,i) in data" :key="i">
-        {{JSON.stringify(v)}}
-        <el-button type="primary" @click="mod(v)" icon="el-icon-edit">修改</el-button>
-        <el-button type="danger" @click="del(v)" icon="el-icon-delete">删除</el-button>
-      </li>
-    </ul>
+    <el-divider></el-divider>
+    <el-card shadow="hover" v-for="(v,i) in data" :key="i" style="width:100%">
+      <el-row type="flex" justify="space-around">
+        <el-col class="item-json">
+          <json-viewer :value="v" :expand-depth="5" copyable boxed sort></json-viewer>
+        </el-col>
+        <el-col class="item-btns">
+          <el-button type="primary" @click="mod(v)" icon="el-icon-edit">修改</el-button>
+          <el-button type="danger" @click="del(v)" icon="el-icon-delete">删除</el-button>
+        </el-col>
+      </el-row>
+    </el-card>
+    <el-pagination class="list-pager"
+      background
+      @current-change="jump"
+      :current-page="nowPage"
+      layout="total,  prev, pager, next, jumper"
+      :total="total"
+    ></el-pagination>
     <el-dialog title="修改数据" :visible.sync="modData.show">
       <div>
         <el-input type="textarea" v-model="modData.data"></el-input>
@@ -85,6 +97,7 @@ import { Vue, Component, Watch } from 'vue-property-decorator'
 import { DbBelong, parserMongoStr } from '@/utils/utils'
 import { parseFilter } from "mongodb-query-parser"
 import { mongo } from '@/type/ipc'
+import JsonViewer from 'vue-json-viewer'
 import _ from 'lodash'
 enum sortType {
   asc = 1,
@@ -115,17 +128,23 @@ const QUERY: queryObj = {
   fitter: '',
   sort: {},
   projection: {},
-  limit: 20,
+  limit: 10,
   skip: 0
 }
 
-@Component
+@Component({
+  components: {
+    JsonViewer
+  }
+})
 export default class collectInfo extends Vue {
   belong: DbBelong = { link: '' }
   query: queryObj = _.cloneDeep(QUERY)
   newProject: project = { show: false, value: '', display: displayType.display }
   newSort: sort = { show: false, name: '', sort: sortType.asc }
   data: Array<Object> = []
+  nowPage: number = 1
+  total: number = 0
   modData = {
     show: false,
     id: '',
@@ -184,7 +203,7 @@ export default class collectInfo extends Vue {
 
   showProject() {
     this.newProject.show = true
-    this.$nextTick(()=>(this.$refs['newProject'] as Vue).focus())
+    this.$nextTick(() => (this.$refs['newProject'] as Vue).focus())
   }
   projectConfirm() {
     if (this.newProject.value != '') {
@@ -195,9 +214,10 @@ export default class collectInfo extends Vue {
   removeProject(key: string) {
     this.$delete(this.query.projection, key)
   }
+
   showSort() {
     this.newSort.show = true
-    this.$nextTick(()=>(this.$refs['newSort'] as Vue).focus())
+    this.$nextTick(() => (this.$refs['newSort'] as Vue).focus())
   }
   sortConfirm() {
     if (this.newSort.name != '') {
@@ -208,6 +228,7 @@ export default class collectInfo extends Vue {
   removeSort(key: string) {
     this.$delete(this.query.sort, key)
   }
+
   @Watch('$route.params.id')
   changeCollect(val: string) {
     this.belong = parserMongoStr(val)
@@ -215,6 +236,7 @@ export default class collectInfo extends Vue {
   }
   search() {
     let query = Object.assign({}, this.query)
+    query.skip += (this.nowPage - 1) * query.limit
     try {
       query.fitter = parseFilter(query.fitter)
     } catch (error) {
@@ -234,11 +256,16 @@ export default class collectInfo extends Vue {
     }, this.belong)
     this.$ipc.send('mongoReq', req)
   }
+  jump(val: number) {
+    this.nowPage = val
+    this.search()
+  }
+
   beforeDestroy() {
     this.$store.commit('OFF_EVENT', this._uid)
   }
   mounted() {
-    if (!this.$store.state.tab.restore){
+    if (!this.$store.state.tab.restore) {
       //如果没有存数据，初始化
       this.changeCollect(this.$route.params.id)
     }
@@ -269,4 +296,13 @@ export default class collectInfo extends Vue {
 </script>
 
 <style lang="less" scoped>
+.item-btns {
+  min-width: 200px;
+  padding-left: 20px;
+  align-items: center;
+  display: flex;
+}
+.list-pager{
+  padding-bottom: 50px;
+}
 </style>

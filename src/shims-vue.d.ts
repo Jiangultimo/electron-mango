@@ -8,3 +8,6 @@ declare module 'mongodb-query-parser' {
 declare module 'mongodb-extended-json' {
   export function stringify(obj:Object):string
 }
+declare module 'vue-json-viewer' {
+  
+}
