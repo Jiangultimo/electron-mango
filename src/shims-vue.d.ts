@@ -11,3 +11,8 @@ declare module 'mongodb-extended-json' {
 declare module 'vue-json-viewer' {
   
 }
+declare module 'jsoneditor' {
+  export default class JSONEditor {
+    constructor(container: HTMLElement, options: Object, json: Object)
+  }
+}

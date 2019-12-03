@@ -5,6 +5,15 @@ module.exports = ({
   arg,
   handleError
 }) => ({
+  addItem() {
+    const client = global.shared.dbClient[arg.link]
+    const table = client.db(arg.db).collection(arg.collect)
+    table.insertOne(arg.data)
+      .then((_,data) => {
+        arg.data = data
+        event.sender.send('mongoRes', arg)
+      })
+  },
   mod() {
     const client = global.shared.dbClient[arg.link]
     const table = client.db(arg.db).collection(arg.collect)
@@ -19,7 +28,6 @@ module.exports = ({
     const table = client.db(arg.db).collection(arg.collect)
     table.updateMany(arg.data.where,arg.data.update)
       .then((data) => {
-        console.log(data);
         arg.data = {}
         event.sender.send('mongoRes', arg)
       })

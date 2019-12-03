@@ -1,5 +1,5 @@
 <template>
-  <div style="display: flex;">
+  <div style="display: flex;width:100%">
     <div class="navs">
       <nav-tree/>
     </div>
@@ -31,5 +31,9 @@ export default class Blank extends Vue { }
   width: 200px;
   min-width: 200px;
   height: 100%;
+  padding-right: 9px;
+}
+.home{
+  width: 100%;
 }
 </style>

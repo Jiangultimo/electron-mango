@@ -12,6 +12,7 @@
     "@types/lodash": "^4.14.145",
     "electron-json-storage": "^4.1.5",
     "element-ui": "^2.4.11",
+    "jsoneditor": "^7.4.0",
     "lodash": "^4.17.15",
     "mongodb": "^3.1.10",
     "mongodb-query-parser": "^1.2.1",

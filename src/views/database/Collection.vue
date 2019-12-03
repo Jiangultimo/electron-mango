@@ -20,9 +20,9 @@
           @keyup.esc.native="newProject.show=false"
         >
           <template slot="append">
-            <el-select style="width:90px" v-model="newProject.display">
+            <el-select style="width:90px" @change="projectConfirm" v-model="newProject.display">
               <el-option label="显示" :value="1" />
-              <el-option label="隐藏" :value="-1" />
+              <el-option label="隐藏" :value="0" />
             </el-select>
           </template>
         </el-input>
@@ -44,7 +44,7 @@
           @keyup.esc.native="newSort.show=false"
         >
           <template slot="append">
-            <el-select v-model="newSort.sort">
+            <el-select style="width:90px" @change="sortConfirm" v-model="newSort.sort">
               <el-option label="升序" :value="1" />
               <el-option label="降序" :value="-1" />
             </el-select>
@@ -60,6 +60,7 @@
       </el-form-item>
     </el-form>
     <el-button type="primary" @click="search" icon="el-icon-search">查找</el-button>
+    <el-button type="primary" @click="addItem" icon="el-icon-plus">插入</el-button>
     <el-divider></el-divider>
     <el-card shadow="hover" v-for="(v,i) in data" :key="i" style="width:100%">
       <el-row type="flex" justify="space-around">
@@ -81,11 +82,20 @@
     ></el-pagination>
     <el-dialog title="修改数据" :visible.sync="modData.show">
       <div>
-        <el-input type="textarea" v-model="modData.data"></el-input>
+        <div id="modContent"></div>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="modData.show = false">取 消</el-button>
         <el-button type="primary" @click="subMod">确 定</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog title="插入数据" :visible.sync="addData.show">
+      <div>
+        <div id="addContent"></div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addData.show = false">取 消</el-button>
+        <el-button type="primary" @click="subAdd">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -99,13 +109,24 @@ import { parseFilter } from "mongodb-query-parser"
 import { mongo } from '@/type/ipc'
 import JsonViewer from 'vue-json-viewer'
 import _ from 'lodash'
+import JSONEditor from 'jsoneditor'
+import 'jsoneditor/dist/jsoneditor.css'
+
 enum sortType {
   asc = 1,
   desc = -1
 }
 enum displayType {
   display = 1,
-  hide = -1
+  hide = 0
+}
+interface addModel{
+  show:boolean
+  editor:any
+  data:string
+}
+interface modModel extends addModel{
+  id:string
 }
 interface sort {
   show: boolean
@@ -145,9 +166,15 @@ export default class collectInfo extends Vue {
   data: Array<Object> = []
   nowPage: number = 1
   total: number = 0
-  modData = {
+  modData:modModel = {
     show: false,
+    editor:null,
     id: '',
+    data: ''
+  }
+  addData:addModel = {
+    show: false,
+    editor:null,
     data: ''
   }
 
@@ -177,15 +204,27 @@ export default class collectInfo extends Vue {
    */
   mod(val: any) {
     if ('_id' in val) {
-      this.modData.id = val['_id']['$oid']
-      this.modData.data = JSON.stringify(val)
       this.modData.show = true
+      this.modData.id = val['_id']['$oid']
+      if (this.modData.editor==null){
+        this.$nextTick(()=>this.modData.editor=new JSONEditor(
+          document.getElementById('modContent')!,
+          {
+            enableSort:false,
+            enableTransform:false
+          },
+          val
+          ))
+      }else{
+        this.modData.editor.set(val)
+      }
     } else {
       this.$message.error('没有找到_id，无法操作！')
     }
   }
 
   subMod() {
+    this.modData.data=this.modData.editor.getText()
     this.$store.commit('ADD_EVENT', {
       vueId: this._uid,
       handle: (data: mongo) => {
@@ -201,6 +240,49 @@ export default class collectInfo extends Vue {
     this.$ipc.send('mongoReq', req)
   }
 
+  /**
+   * 打开添加模态框
+   */
+  addItem(){
+    this.addData.show=true
+    if (this.addData.editor==null){
+      this.$nextTick(()=>{
+        this.addData.editor=new JSONEditor(
+        document.getElementById('addContent')!,
+        {
+          enableSort:false,
+          modes:['tree','code'],
+          enableTransform:false
+        },{})
+        this.addData.editor.expandAll()
+      })
+    }
+  }
+
+  subAdd(){
+    //try if input is illigal
+    try {
+      this.addData.editor.get()
+    } catch (error) {
+      this.$notify.error('输入非法！')
+      return
+    }
+    this.$store.commit('ADD_EVENT', {
+      vueId: this._uid,
+      handle: (data: mongo) => {
+        this.$message.success(`添加成功！`)
+        this.addData.show = false
+        console.log(data)
+        this.search()
+      }    })
+    const req: mongo = Object.assign({
+      action: 'addItem',
+      eventId: this.$store.state.db.eventId,
+      data: this.addData.editor.get()
+    }, this.belong)
+    this.$ipc.send('mongoReq', req)
+  }
+
   showProject() {
     this.newProject.show = true
     this.$nextTick(() => (this.$refs['newProject'] as Vue).focus())
@@ -208,8 +290,8 @@ export default class collectInfo extends Vue {
   projectConfirm() {
     if (this.newProject.value != '') {
       this.$set(this.query.projection, this.newProject.value, this.newProject.display)
+      this.newProject = { show: false, value: '', display: displayType.display }
     }
-    this.newProject = { show: false, value: '', display: displayType.display }
   }
   removeProject(key: string) {
     this.$delete(this.query.projection, key)
@@ -222,8 +304,8 @@ export default class collectInfo extends Vue {
   sortConfirm() {
     if (this.newSort.name != '') {
       this.$set(this.query.sort, this.newSort.name, this.newSort.sort)
+      this.newSort = { show: false, name: '', sort: sortType.asc }
     }
-    this.newSort = { show: false, name: '', sort: sortType.asc }
   }
   removeSort(key: string) {
     this.$delete(this.query.sort, key)
