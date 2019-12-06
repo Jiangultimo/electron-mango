@@ -3,6 +3,8 @@ const jsonStorage = require('electron-json-storage')
 const storeKey = 'dbList'
 const handleAction = require('./main/action')
 const mongoAction = require('./main/mongoAction')
+const isDev = process.env.NODE_ENV !== 'production'
+const HOST=isDev?'localhost:3000/':''
 global.shared = {
   dbClient:{},
   dbList: {}
@@ -22,7 +24,7 @@ const menuTemplate = [
       {
         label: '新建连接',
         click() {
-          openWin('http://localhost:3000/#/database/add')
+          openWin('http://'+HOST+'#/database/add')
         }
       },
       { type: 'separator' },
@@ -32,7 +34,7 @@ const menuTemplate = [
   {
     label: '关于',
     click() {
-      openWin('http://localhost:3000/#/about')
+      openWin('http://'+HOST+'/#/about')
     }
   }
 ]
@@ -50,7 +52,7 @@ function openWin(url) {
     newWin.show()
   })
   newWin.loadURL(url)
-  newWin.webContents.openDevTools()
+  isDev && newWin.webContents.openDevTools()
 }
 
 function createWindow() {
@@ -61,13 +63,16 @@ function createWindow() {
       nodeIntegration: true,
     },
   })
-  win.loadURL('http://localhost:3000/')
+  win.loadURL('http://'+HOST)
   win.on('closed', function () {
     win = null
   })
-  win.webContents.openDevTools();
-  const menu = Menu.buildFromTemplate(menuTemplate)
-  // Menu.setApplicationMenu(menu)
+  if (isDev) {
+    win.webContents.openDevTools();
+  } else {
+    const menu = Menu.buildFromTemplate(menuTemplate)
+    Menu.setApplicationMenu(menu)
+  }
 }
 
 app.on('ready', createWindow)
