@@ -4,7 +4,7 @@ const storeKey = 'dbList'
 const handleAction = require('./main/action')
 const mongoAction = require('./main/mongoAction')
 const isDev = process.env.NODE_ENV !== 'production'
-const HOST=isDev?'localhost:3000/':''
+const HOST=isDev?'localhost:3000/#':''
 global.shared = {
   dbClient:{},
   dbList: {}
@@ -24,7 +24,7 @@ const menuTemplate = [
       {
         label: '新建连接',
         click() {
-          openWin('http://'+HOST+'#/database/add')
+          openWin('/database/add')
         }
       },
       { type: 'separator' },
@@ -34,7 +34,7 @@ const menuTemplate = [
   {
     label: '关于',
     click() {
-      openWin('http://'+HOST+'#/about')
+      openWin('/about')
     }
   }
 ]
@@ -51,7 +51,7 @@ function openWin(url) {
   newWin.once('ready-to-show', () => {
     newWin.show()
   })
-  newWin.loadURL(url)
+  newWin.loadURL('http://'+HOST+url)
   isDev && newWin.webContents.openDevTools()
 }
 

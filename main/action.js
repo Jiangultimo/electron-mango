@@ -43,9 +43,9 @@ module.exports = ({
   },
   'showAddDb'() {
     if ('name' in arg) {
-      openWin(`http://localhost:3000/#/database/edit/${arg['name']}`)
+      openWin(`/database/edit/${arg['name']}`)
     } else {
-      openWin('http://localhost:3000/#/database/add')
+      openWin('/database/add')
     }
   },
   'connect'() {
