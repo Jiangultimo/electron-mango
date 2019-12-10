@@ -34,7 +34,7 @@ const menuTemplate = [
   {
     label: '关于',
     click() {
-      openWin('http://'+HOST+'/#/about')
+      openWin('http://'+HOST+'#/about')
     }
   }
 ]

@@ -1,11 +1,15 @@
 module.exports = {
+    packagerConfig: {
+        ignore:'src|public|main|config|.vscode'
+    },
     makers: [
         {
-            name: 'maker-zip',
-            platforms: ['darwin', 'linux'],
-            config: {
-                // Config here
-            }
-        }
+            name: '@electron-forge/maker-zip',
+            platforms: ['darwin', 'linux']
+        },
+        // {
+        //     name: '@electron-forge/maker-dmg',
+        //     platforms: ['darwin', 'linux']
+        // }
     ]
 }

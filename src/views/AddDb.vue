@@ -32,10 +32,10 @@
 
 <script lang="ts">
 import mongoUtil,{mongoUri} from '@/utils/MongoUri'
-const { MongoClient } = window.require('mongodb')
 const { remote } = window.require('electron')
 import { Component, Vue } from 'vue-property-decorator'
 import { notify } from '@/type/ipc'
+import { mongo } from '@/type/ipc'
 
 @Component
 export default class addDb extends Vue {
@@ -57,16 +57,18 @@ export default class addDb extends Vue {
   }
   test () {
     this.form.uri = mongoUtil.format(this.params)
-    var client = new MongoClient(this.form.uri, { useNewUrlParser: true })
-    client.connect((err:Error) => {
-      if (err != null) {
-        this.$message.error(err.message)
-        return false
-      } else {
-        client.close()
+    this.$store.commit('ADD_EVENT', {
+      vueId: this._uid,
+      handle: (data: mongo) => {
         this.$message.success('连接成功！')
-      }
-    })
+      }    })
+    const req: mongo = {
+      action: 'tryConntect',
+      eventId: this.$store.state.db.eventId,
+      data: this.form.uri,
+      link:''
+    }
+    this.$ipc.send('mongoReq', req)
   }
   save () {
     this.form.uri = mongoUtil.format(this.params)

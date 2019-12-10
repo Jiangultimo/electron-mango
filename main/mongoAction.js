@@ -1,4 +1,4 @@
-const { ObjectID } = require('mongodb')
+const { ObjectID,MongoClient } = require('mongodb')
 const { serialize, parse } = require('mongodb-extended-json')
 module.exports = ({
   event,
@@ -83,6 +83,18 @@ module.exports = ({
       .catch((e) => {
         handleError(e.toString(), event)
       })
+  },
+  tryConntect() {
+    var client = new MongoClient(arg.data, { useNewUrlParser: true })
+    client.connect((err) => {
+      if (err != null) {
+        handleError(err.message, event)
+        return false
+      } else {
+        client.close()
+        event.sender.send('mongoRes', arg)
+      }
+    })
   },
   getCollects() {
     const client = global.shared.dbClient[arg.link]
