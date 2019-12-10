@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="test">
     <el-form label-width="80px">
       <el-form-item label="fitter">
         <el-input v-model="query.fitter" />
@@ -61,7 +61,16 @@
     </el-form>
     <el-button type="primary" @click="search" icon="el-icon-search">查找</el-button>
     <el-button type="primary" @click="addItem" icon="el-icon-plus">插入</el-button>
+    <el-button type="primary" @click="customData.show = true">自定义命令</el-button>
     <el-divider></el-divider>
+    <el-pagination
+      class="list-pager"
+      background
+      @current-change="jump"
+      :current-page="nowPage"
+      layout="total,  prev, pager, next, jumper"
+      :total="total"
+    />
     <el-card shadow="hover" v-for="(v,i) in data" :key="i" style="width:100%">
       <el-row type="flex" justify="space-around">
         <el-col class="item-json">
@@ -73,13 +82,15 @@
         </el-col>
       </el-row>
     </el-card>
-    <el-pagination class="list-pager"
+    <el-pagination
+      class="list-pager"
       background
       @current-change="jump"
       :current-page="nowPage"
       layout="total,  prev, pager, next, jumper"
       :total="total"
-    ></el-pagination>
+    />
+    <el-backtop></el-backtop>
     <el-dialog title="修改数据" :visible.sync="modData.show">
       <div>
         <div id="modContent"></div>
@@ -98,11 +109,18 @@
         <el-button type="primary" @click="subAdd">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog title="自定义命令" :visible.sync="customData.show">
+      <div>
+        <custom-cmd :belong="belong" ref="custom" />
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="customData.show = false">关闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts">
-const { remote } = window.require('electron')
 import { Vue, Component, Watch } from 'vue-property-decorator'
 import { DbBelong, parserMongoStr } from '@/utils/utils'
 import { parseFilter } from "mongodb-query-parser"
@@ -111,6 +129,9 @@ import JsonViewer from 'vue-json-viewer'
 import _ from 'lodash'
 import JSONEditor from 'jsoneditor'
 import 'jsoneditor/dist/jsoneditor.css'
+import { ElLoadingComponent } from 'element-ui/types/loading'
+import { restoreData } from '@/components/CustomCmd/index.vue'
+import CustomCmd from '@/components/CustomCmd/index.vue'
 
 enum sortType {
   asc = 1,
@@ -120,13 +141,13 @@ enum displayType {
   display = 1,
   hide = 0
 }
-interface addModel{
-  show:boolean
-  editor:any
-  data:string
+interface addModel {
+  show: boolean
+  editor: any
+  data: string
 }
-interface modModel extends addModel{
-  id:string
+interface modModel extends addModel {
+  id: string
 }
 interface sort {
   show: boolean
@@ -155,6 +176,7 @@ const QUERY: queryObj = {
 
 @Component({
   components: {
+    CustomCmd,
     JsonViewer
   }
 })
@@ -166,17 +188,25 @@ export default class collectInfo extends Vue {
   data: Array<Object> = []
   nowPage: number = 1
   total: number = 0
-  modData:modModel = {
+
+  modData: modModel = {
     show: false,
-    editor:null,
+    editor: null,
     id: '',
     data: ''
   }
-  addData:addModel = {
+  addData: addModel = {
     show: false,
-    editor:null,
+    editor: null,
     data: ''
   }
+  customData: {
+    show: boolean
+    data: restoreData | null
+  } = {
+      show: false,
+      data: null
+    }
 
   del(obj: any) {
     if ('_id' in obj) {
@@ -206,16 +236,16 @@ export default class collectInfo extends Vue {
     if ('_id' in val) {
       this.modData.show = true
       this.modData.id = val['_id']['$oid']
-      if (this.modData.editor==null){
-        this.$nextTick(()=>this.modData.editor=new JSONEditor(
+      if (this.modData.editor == null) {
+        this.$nextTick(() => this.modData.editor = new JSONEditor(
           document.getElementById('modContent')!,
           {
-            enableSort:false,
-            enableTransform:false
+            enableSort: false,
+            enableTransform: false
           },
           val
-          ))
-      }else{
+        ))
+      } else {
         this.modData.editor.set(val)
       }
     } else {
@@ -224,7 +254,7 @@ export default class collectInfo extends Vue {
   }
 
   subMod() {
-    this.modData.data=this.modData.editor.getText()
+    this.modData.data = this.modData.editor.getText()
     this.$store.commit('ADD_EVENT', {
       vueId: this._uid,
       handle: (data: mongo) => {
@@ -243,23 +273,23 @@ export default class collectInfo extends Vue {
   /**
    * 打开添加模态框
    */
-  addItem(){
-    this.addData.show=true
-    if (this.addData.editor==null){
-      this.$nextTick(()=>{
-        this.addData.editor=new JSONEditor(
-        document.getElementById('addContent')!,
-        {
-          enableSort:false,
-          modes:['tree','code'],
-          enableTransform:false
-        },{})
+  addItem() {
+    this.addData.show = true
+    if (this.addData.editor == null) {
+      this.$nextTick(() => {
+        this.addData.editor = new JSONEditor(
+          document.getElementById('addContent')!,
+          {
+            enableSort: false,
+            modes: ['tree', 'code'],
+            enableTransform: false
+          }, {})
         this.addData.editor.expandAll()
       })
     }
   }
 
-  subAdd(){
+  subAdd() {
     //try if input is illigal
     try {
       this.addData.editor.get()
@@ -272,7 +302,6 @@ export default class collectInfo extends Vue {
       handle: (data: mongo) => {
         this.$message.success(`添加成功！`)
         this.addData.show = false
-        console.log(data)
         this.search()
       }    })
     const req: mongo = Object.assign({
@@ -325,11 +354,22 @@ export default class collectInfo extends Vue {
       this.$message.error('fitter参数非法！')
       return
     }
+    let loading: ElLoadingComponent | null = this.$loading({})
+    setTimeout(() => {
+      if (loading) {
+        loading.close()
+        loading = null
+        this.$message.error('请求超时，请重试！')
+      }
+    }, 11000);
 
     this.$store.commit('ADD_EVENT', {
       vueId: this._uid,
       handle: (data: mongo) => {
-        this.data = data.data
+        this.data = data.data.data
+        this.total = data.data.total - this.query.skip
+        loading!.close()
+        loading = null
       }    })
     const req: mongo = Object.assign({
       action: 'find',
@@ -354,23 +394,35 @@ export default class collectInfo extends Vue {
     this.$store.commit('REG_CALLBACK', { cid: this._uid, callback: { save: this.save, restore: this.restore } })
   }
   save() {
+    console.log('col save')
     let res = {
       query: _.cloneDeep(this.query),
       newProject: _.cloneDeep(this.newProject),
       newSort: _.cloneDeep(this.newSort),
+      custom: 'custom' in this.$refs ? (this.$refs['custom'] as CustomCmd).save() : this.customData.data
     }
     return res
   }
   restore(info: any) {
+    console.log('col restore')
     if (!_.isEmpty(info)) {
       this.query = info.query
       this.newProject = info.newProject
       this.newSort = info.newSort
+      if ('custom' in this.$refs) {
+        (this.$refs['custom'] as CustomCmd).restore(info.custom)
+      } else {
+        this.customData.data = info.custom
+      }
     } else {
       //新开的页面，需要重新初始化
       this.query = _.cloneDeep(QUERY)
       this.newProject = { show: false, value: '', display: displayType.display }
       this.newSort = { show: false, name: '', sort: sortType.asc }
+      this.customData.data = null
+      if ('custom' in this.$refs) {
+        (this.$refs['custom'] as CustomCmd).restore(null)
+      }
     }
     this.changeCollect(this.$route.params.id)
   }
@@ -384,7 +436,7 @@ export default class collectInfo extends Vue {
   align-items: center;
   display: flex;
 }
-.list-pager{
+.list-pager {
   padding-bottom: 50px;
 }
 </style>

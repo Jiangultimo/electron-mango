@@ -1,5 +1,5 @@
 const { ObjectID } = require('mongodb')
-const { serialize,parse } = require('mongodb-extended-json')
+const { serialize, parse } = require('mongodb-extended-json')
 module.exports = ({
   event,
   arg,
@@ -9,27 +9,36 @@ module.exports = ({
     const client = global.shared.dbClient[arg.link]
     const table = client.db(arg.db).collection(arg.collect)
     table.insertOne(arg.data)
-      .then((_,data) => {
+      .then((_, data) => {
         arg.data = data
         event.sender.send('mongoRes', arg)
+      })
+      .catch((e) => {
+        handleError(e.toString(), event)
       })
   },
   mod() {
     const client = global.shared.dbClient[arg.link]
     const table = client.db(arg.db).collection(arg.collect)
-    table.updateOne({ '_id': ObjectID(arg.data.id) },{'$set':parse(arg.data.data)})
+    table.updateOne({ '_id': ObjectID(arg.data.id) }, { '$set': parse(arg.data.data) })
       .then((data) => {
         arg.data = {}
         event.sender.send('mongoRes', arg)
+      })
+      .catch((e) => {
+        handleError(e.toString(), event)
       })
   },
   modMany() {
     const client = global.shared.dbClient[arg.link]
     const table = client.db(arg.db).collection(arg.collect)
-    table.updateMany(arg.data.where,arg.data.update)
+    table.updateMany(arg.data[0], arg.data[1])
       .then((data) => {
-        arg.data = {}
+        arg.data = `匹配到${data.matchedCount}条数据，修改${data.modifiedCount}条数据`
         event.sender.send('mongoRes', arg)
+      })
+      .catch((e) => {
+        handleError(e.toString(), event)
       })
   },
   del() {
@@ -40,14 +49,20 @@ module.exports = ({
         arg.data = data.deletedCount
         event.sender.send('mongoRes', arg)
       })
+      .catch((e) => {
+        handleError(e.toString(), event)
+      })
   },
   deleteMany() {
     const client = global.shared.dbClient[arg.link]
     const table = client.db(arg.db).collection(arg.collect)
-    table.deleteMany(arg.data)
+    table.deleteMany(arg.data[0])
       .then((data) => {
-        arg.data = data.deletedCount
+        arg.data = `成功删除${data.deletedCount}条数据`
         event.sender.send('mongoRes', arg)
+      })
+      .catch((e) => {
+        handleError(e.toString(), event)
       })
   },
   find() {
@@ -58,8 +73,15 @@ module.exports = ({
     table.find(fitter, arg.data)
       .toArray()
       .then((data) => {
-        arg.data = data.map((v) => serialize(v))
+        arg.data = { 'data': data.map((v) => serialize(v)) }
+        return table.countDocuments(fitter, { maxTimeMS: 10000 })
+      })
+      .then((res) => {
+        arg.data.total = res
         event.sender.send('mongoRes', arg)
+      })
+      .catch((e) => {
+        handleError(e.toString(), event)
       })
   },
   getCollects() {
