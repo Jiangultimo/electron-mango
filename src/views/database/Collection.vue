@@ -241,6 +241,7 @@ export default class collectInfo extends Vue {
           document.getElementById('modContent')!,
           {
             enableSort: false,
+            timestampFormat: this.formatTime,
             enableTransform: false
           },
           val
@@ -281,6 +282,7 @@ export default class collectInfo extends Vue {
           document.getElementById('addContent')!,
           {
             enableSort: false,
+            timestampFormat: this.formatTime,
             modes: ['tree', 'code'],
             enableTransform: false
           }, {})
@@ -425,6 +427,17 @@ export default class collectInfo extends Vue {
       }
     }
     this.changeCollect(this.$route.params.id)
+  }
+
+  formatTime({ field, value, path }: { field: string, value: number, path: any }) {
+    let fillStr = (str: number, size: number) => {
+      var res = '0'.repeat(size) + str
+      return res.substr(-size)
+    }
+    let date = (value > 10000000000) ? new Date(value) : new Date(value * 1000)
+    let str = date.toLocaleDateString()
+    str += ' ' + fillStr(date.getHours(), 2) + ':' + fillStr(date.getMinutes(), 2) + ':' + fillStr(date.getSeconds(), 2)
+    return str
   }
 }
 </script>
