@@ -166,6 +166,7 @@ interface queryObj {
   limit: number
   skip: number
 }
+interface editorTime{ field: string, value: number, path: any }
 const QUERY: queryObj = {
   fitter: '',
   sort: {},
@@ -241,6 +242,7 @@ export default class collectInfo extends Vue {
           document.getElementById('modContent')!,
           {
             enableSort: false,
+            timestampTag:this.isTimstamp,
             timestampFormat: this.formatTime,
             enableTransform: false
           },
@@ -282,6 +284,7 @@ export default class collectInfo extends Vue {
           document.getElementById('addContent')!,
           {
             enableSort: false,
+            timestampTag:this.isTimstamp,
             timestampFormat: this.formatTime,
             modes: ['tree', 'code'],
             enableTransform: false
@@ -396,7 +399,6 @@ export default class collectInfo extends Vue {
     this.$store.commit('REG_CALLBACK', { cid: this._uid, callback: { save: this.save, restore: this.restore } })
   }
   save() {
-    console.log('col save')
     let res = {
       query: _.cloneDeep(this.query),
       newProject: _.cloneDeep(this.newProject),
@@ -406,7 +408,6 @@ export default class collectInfo extends Vue {
     return res
   }
   restore(info: any) {
-    console.log('col restore')
     if (!_.isEmpty(info)) {
       this.query = info.query
       this.newProject = info.newProject
@@ -429,7 +430,7 @@ export default class collectInfo extends Vue {
     this.changeCollect(this.$route.params.id)
   }
 
-  formatTime({ field, value, path }: { field: string, value: number, path: any }) {
+  formatTime({ field, value, path }: editorTime) {
     let fillStr = (str: number, size: number) => {
       var res = '0'.repeat(size) + str
       return res.substr(-size)
@@ -438,6 +439,9 @@ export default class collectInfo extends Vue {
     let str = date.toLocaleDateString()
     str += ' ' + fillStr(date.getHours(), 2) + ':' + fillStr(date.getMinutes(), 2) + ':' + fillStr(date.getSeconds(), 2)
     return str
+  }
+  isTimstamp({ field, value, path }:editorTime ){
+    return field.toUpperCase().indexOf('TIME')>=0
   }
 }
 </script>
